@@ -21,6 +21,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://*.firebaseapp.com; connect-src 'self' https://*.googleapis.com https://www.gstatic.com https://apis.google.com https://*.firebaseapp.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; img-src 'self' data: blob: https://*.googleusercontent.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; base-uri 'none'; form-action 'none'">
 <meta name="theme-color" content="#0e1014">
 <meta name="color-scheme" content="dark">
 <title>Mi rutina · Definición</title>
@@ -108,15 +109,39 @@ summary::before{content:"▸ "}details[open]>summary::before{content:"▾ "}
 .toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translateX(-50%);z-index:40;background:#22262f;border:1px solid var(--borde);border-radius:12px;padding:.6rem 1rem;font-size:.92rem;max-width:90vw;box-shadow:0 6px 24px rgba(0,0,0,.4)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .6rem}
 .grid2 label{font-size:.8rem;color:var(--suave)}
-.grafico{width:100%;height:auto;display:block;margin:.4rem 0}
+.grafico{width:100%;max-width:640px;height:auto;display:block;margin:.4rem auto}
 .fuera{border-top:1px solid var(--borde);padding-top:.5rem;margin-top:.5rem}
 .fases li{margin-bottom:.6rem}.fases li.actual b{color:var(--acento-2)}
 .borrar{background:none;border:0;color:var(--suave);font-size:1rem;cursor:pointer;padding:.2rem .5rem}
 [hidden]{display:none!important}
+.top-der{display:flex;gap:.4rem;align-items:center}
+.cuenta{appearance:none;border:1px solid var(--borde);background:var(--tarjeta-2);color:var(--texto);border-radius:999px;padding:.25rem .65rem;font:inherit;font-size:.8rem;cursor:pointer;white-space:nowrap}
+.cuenta.on{border-color:rgba(56,210,122,.6);color:var(--ok)}
+select{font:inherit;font-size:16px;color:var(--texto);background:#0b0d11;border:1px solid var(--borde);border-radius:10px;padding:.5rem .6rem;min-height:44px;width:100%}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-top:.5rem}
+.fotos figure{margin:0;position:relative}
+.fotos img,.comparar img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:#000;display:block}
+.fotos figcaption{font-size:.72rem;color:var(--suave);text-align:center}
+.fotos .borrar{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.65);border-radius:8px;color:#fff}
+.comparar{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem}
+.uid{font-family:ui-monospace,monospace;font-size:.78rem;word-break:break-all;background:#0b0d11;border:1px solid var(--borde);border-radius:8px;padding:.4rem .5rem;display:block;margin:.3rem 0}
+@media (min-width:900px){
+  body{padding-bottom:30px;padding-left:210px}
+  .nav{top:0;right:auto;width:210px;display:flex;flex-direction:column;gap:.2rem;padding:70px .6rem 1rem;border-top:0;border-right:1px solid var(--borde)}
+  .nav button{flex:none;flex-direction:row;justify-content:flex-start;gap:.75rem;padding:0 .9rem;font-size:.95rem;min-height:46px;border-radius:10px}
+  .nav button[aria-current=page]{background:var(--tarjeta-2)}
+  main{max-width:1200px;padding:1.25rem}
+  .tab.activa{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 1rem;align-items:start}
+  .tab .ancho,.tab>.aviso{grid-column:1/-1}
+  .timer{left:calc(210px + 1rem)}
+  .fotos{grid-template-columns:repeat(6,1fr)}
+  .comparar{grid-template-columns:repeat(6,1fr)}
+}
 </style>
 </head>
 <body>
-<header class="top"><h1>🏋️ Mi rutina</h1><span id="pill" class="pill"></span></header>
+<header class="top"><h1>🏋️ Mi rutina</h1><div class="top-der"><span id="pill" class="pill"></span><button id="cuenta" class="cuenta" data-acc="cuenta">☁️ Entrar</button></div></header>
 <main>
   <section id="tab-hoy" class="tab activa" aria-label="Hoy"></section>
   <section id="tab-rutina" class="tab" aria-label="Rutina"></section>
@@ -507,9 +532,10 @@ var PLAN = {
       "Maeo 2021 y 2023: femoral sentado y tríceps sobre la cabeza"
     ],
     pagina: [
-      "Lo que anotas se guarda solo en este celular, en el navegador. No se sube a internet.",
-      "Haz un respaldo cada 2 semanas: Progreso → Tus datos → Exportar respaldo. Puedes mandártelo por WhatsApp o guardarlo en Drive.",
-      "Si cambias de celular o borras los datos del navegador, carga el respaldo con Importar.",
+      "**Entra con Google** (botón arriba a la derecha) y todo se guarda en la nube: lo ves igual en el celular y en la PC. Solo tu cuenta puede leer tus datos.",
+      "Sin internet sigue funcionando: guarda en el equipo y sube los cambios cuando vuelve la conexión.",
+      "Igual puedes descargar una copia cuando quieras: Progreso → Respaldo → Exportar.",
+      
       "Para tenerla como app: en Chrome, menú ⋮ → Añadir a pantalla de inicio.",
       "Cuando se actualice el plan, tus registros no se borran."
     ]
@@ -533,7 +559,7 @@ function $$(sel, raiz) { return Array.prototype.slice.call((raiz || document).qu
 function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 function md(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
 function lista(items) { return "<ul class=\"chico\">" + items.map(function (t) { return "<li>" + md(t) + "</li>"; }).join("") + "</ul>"; }
-function tarjeta(titulo, cuerpo) { return "<div class=\"tarjeta\"><h2>" + esc(titulo) + "</h2>" + cuerpo + "</div>"; }
+function tarjeta(titulo, cuerpo, ancho) { return "<div class=\"tarjeta" + (ancho ? " ancho" : "") + "\"><h2>" + esc(titulo) + "</h2>" + cuerpo + "</div>"; }
 function numero(v) { if (v == null || v === "") return null; var n = parseFloat(String(v).replace(",", ".")); return isFinite(n) ? n : null; }
 function fmt(n, d) { if (n == null || !isFinite(n)) return "–"; var f = Math.pow(10, d || 0); return String(Math.round(n * f) / f); }
 function v(x) { return x == null ? "" : x; }
@@ -651,6 +677,7 @@ function render() {
   $("#pill").textContent = (f.def ? f.corto + " · S" + semanaDef(s) + "/" + PLAN.semanasDefinicion : f.corto) + "";
   var html = { hoy: htmlHoy, rutina: htmlRutina, dieta: htmlDieta, progreso: htmlProgreso, guia: htmlGuia }[actual]();
   $("#tab-" + actual).innerHTML = html;
+  pintarCuenta();
 }
 
 function htmlMetas(f, s) {
@@ -672,6 +699,7 @@ function htmlHoy() {
     (desc ? "<p class=\"aviso\">Semana de " + esc(desc.nombre) + ": si faltas por las fiestas, no pasa nada. Descarga solo si te sientes muy cansado o te duelen los tendones (mismos pesos, 1 serie menos, 2-3 reps en reserva).</p>" : "") +
     (esp ? "<p class=\"aviso\">" + esc(esp.nombre) + ": hoy comes a mantenimiento (≈" + PLAN.kcalMantenimiento + " kcal). Mañana vuelves al plan.</p>" : "") + "</div>";
 
+  h = htmlAvisoNube() + h;
   h += "<div class=\"tarjeta destacada\">";
   if (sug.descanso) {
     var n = Object.keys(sug.hechas).length;
@@ -711,7 +739,7 @@ function htmlHoy() {
 
   h += htmlMetasSemana(s);
   var ult = datos.ajustes.ultimoRespaldo;
-  if (datos.registros.length && (!ult || diasEntre(ult, s) >= 14)) h += "<div class=\"aviso\">Hace " + (ult ? diasEntre(ult, s) + " días" : "rato") + " que no haces respaldo de tus datos. <button class=\"btn sec mini\" data-acc=\"exportar\">Exportar ahora</button></div>";
+  if (!nube.user && datos.registros.length && (!ult || diasEntre(ult, s) >= 14)) h += "<div class=\"aviso\">Hace " + (ult ? diasEntre(ult, s) + " días" : "rato") + " que no haces respaldo de tus datos. <button class=\"btn sec mini\" data-acc=\"exportar\">Exportar ahora</button></div>";
   return h;
 }
 
@@ -816,8 +844,10 @@ function guardarSesion() {
   if (fecha > hoy()) fecha = hoy();
   if (!Object.keys(ej).length && !confirm("No anotaste ninguna serie. ¿Marcar la sesión como hecha igual?")) return;
   datos.registros = datos.registros.filter(function (r) { return !(r.fecha === fecha && r.sesion === abierta); });
-  datos.registros.push({ fecha: fecha, sesion: abierta, ej: ej, nota: nota });
+  var reg = { fecha: fecha, sesion: abierta, ej: ej, nota: nota };
+  datos.registros.push(reg);
   datos.registros.sort(porFecha);
+  nubeReg(reg);
   delete datos.borradores[abierta];
   guardar(); aviso("Sesión guardada ✔");
   cerrarSesion(false); irA("hoy");
@@ -912,24 +942,31 @@ function htmlAjuste() {
   if (cambio < -0.9) return "<p class=\"aviso\">Bajas muy rápido (" + fmt(cambio, 2) + " kg/sem). Agrega unas 150 kcal (1 pan o 50 g más de arroz al día) para cuidar el músculo.</p>";
   return "<p class=\"chico ok-txt\">✓ Vas en el ritmo correcto (" + fmt(cambio, 2) + " kg/sem). No cambies nada.</p>";
 }
-function grafico() {
-  var desde = sumarDias(hoy(), -62), pts = datos.pesos.filter(function (p) { return p.fecha >= desde; });
-  if (pts.length < 2) return "<p class=\"chico suave\">Con 2 pesajes o más aparece aquí la gráfica.</p>";
-  var kgs = pts.map(function (p) { return p.kg; }), min = Math.min.apply(null, kgs), max = Math.max.apply(null, kgs), pad = Math.max(0.5, (max - min) * 0.15);
+function linea(serie, o) {
+  o = o || {};
+  if (serie.length < 2) return "<p class=\"chico suave\">" + esc(o.vacio || "Con 2 datos o más aparece la gráfica.") + "</p>";
+  var extra = o.puntos || [], vs = serie.concat(extra).map(function (p) { return p.v; });
+  var min = Math.min.apply(null, vs), max = Math.max.apply(null, vs), pad = Math.max(o.pad || 0.5, (max - min) * 0.15);
   min -= pad; max += pad;
-  var W = 320, H = 140, L = 34, R = 8, T = 10, B = 22;
-  function x(f) { return L + diasEntre(desde, f) / 62 * (W - L - R); }
-  function y(kg) { return T + (1 - (kg - min) / (max - min)) * (H - T - B); }
-  var linea = pts.map(function (p) { return x(p.fecha).toFixed(1) + "," + y(p.kg).toFixed(1); }).join(" ");
-  var puntos = promediosSemanales().filter(function (w) { return w.lunes >= sumarDias(desde, -3); }).map(function (w) {
-    var f = sumarDias(w.lunes, 3); if (f < desde) f = desde;
-    return "<circle cx=\"" + x(f).toFixed(1) + "\" cy=\"" + y(w.prom).toFixed(1) + "\" r=\"4\" fill=\"#ff7a33\"/>";
-  }).join("");
-  return "<svg class=\"grafico\" viewBox=\"0 0 " + W + " " + H + "\" role=\"img\" aria-label=\"Peso de las últimas 9 semanas\">" +
+  var desde = o.desde || serie[0].fecha, hasta = o.hasta || serie[serie.length - 1].fecha, span = Math.max(1, diasEntre(desde, hasta));
+  var W = 320, H = 140, L = 36, R = 8, T = 10, B = 22;
+  function x(f) { return L + Math.max(0, Math.min(span, diasEntre(desde, f))) / span * (W - L - R); }
+  function y(val) { return T + (1 - (val - min) / (max - min)) * (H - T - B); }
+  var pl = serie.map(function (p) { return x(p.fecha).toFixed(1) + "," + y(p.v).toFixed(1); }).join(" ");
+  var marcas = o.marcas ? serie.map(function (p) { return "<circle cx=\"" + x(p.fecha).toFixed(1) + "\" cy=\"" + y(p.v).toFixed(1) + "\" r=\"2.5\" fill=\"#ffb35c\"/>"; }).join("") : "";
+  var pts = extra.map(function (p) { return "<circle cx=\"" + x(p.fecha).toFixed(1) + "\" cy=\"" + y(p.v).toFixed(1) + "\" r=\"4\" fill=\"#ff7a33\"/>"; }).join("");
+  return "<svg class=\"grafico\" viewBox=\"0 0 " + W + " " + H + "\" role=\"img\" aria-label=\"" + esc(o.titulo || "Gráfica") + "\">" +
     "<line x1=\"" + L + "\" y1=\"" + (H - B) + "\" x2=\"" + (W - R) + "\" y2=\"" + (H - B) + "\" stroke=\"#2a2f3a\"/>" +
     "<text x=\"2\" y=\"" + (T + 8) + "\" fill=\"#9ba3af\" font-size=\"10\">" + fmt(max, 1) + "</text><text x=\"2\" y=\"" + (H - B) + "\" fill=\"#9ba3af\" font-size=\"10\">" + fmt(min, 1) + "</text>" +
-    "<text x=\"" + L + "\" y=\"" + (H - 6) + "\" fill=\"#9ba3af\" font-size=\"10\">" + bonita(desde) + "</text><text x=\"" + (W - R) + "\" y=\"" + (H - 6) + "\" fill=\"#9ba3af\" font-size=\"10\" text-anchor=\"end\">" + bonita(hoy()) + "</text>" +
-    "<polyline points=\"" + linea + "\" fill=\"none\" stroke=\"#9ba3af\" stroke-width=\"1.5\"/>" + puntos + "</svg><p class=\"chico suave\">Línea: cada pesaje. Puntos naranjas: promedio de la semana.</p>";
+    "<text x=\"" + L + "\" y=\"" + (H - 6) + "\" fill=\"#9ba3af\" font-size=\"10\">" + bonita(desde) + "</text><text x=\"" + (W - R) + "\" y=\"" + (H - 6) + "\" fill=\"#9ba3af\" font-size=\"10\" text-anchor=\"end\">" + bonita(hasta) + "</text>" +
+    "<polyline points=\"" + pl + "\" fill=\"none\" stroke=\"#9ba3af\" stroke-width=\"1.5\"/>" + marcas + pts + "</svg>";
+}
+function grafico() {
+  var desde = sumarDias(hoy(), -62);
+  var serie = datos.pesos.filter(function (p) { return p.fecha >= desde; }).map(function (p) { return { fecha: p.fecha, v: p.kg }; });
+  var prom = promediosSemanales().filter(function (w) { return w.lunes >= sumarDias(desde, -3); }).map(function (w) { var f = sumarDias(w.lunes, 3); return { fecha: f < desde ? desde : f, v: w.prom }; });
+  if (serie.length < 2) return "<p class=\"chico suave\">Con 2 pesajes o más aparece aquí la gráfica.</p>";
+  return linea(serie, { desde: desde, hasta: hoy(), puntos: prom, titulo: "Peso de las últimas 9 semanas" }) + "<p class=\"chico suave\">Línea: cada pesaje. Puntos naranjas: promedio de la semana.</p>";
 }
 var CAMPOS = [
   ["peso", "Peso (kg)"], ["cintura", "Cintura, a la altura del ombligo"], ["cuello", "Cuello, bajo la manzana de Adán"], ["cadera", "Cadera, parte más ancha"],
@@ -941,33 +978,45 @@ function ultimoValor(campo) { for (var i = datos.medidas.length - 1; i >= 0; i--
 function pesoActual() { var m = ultimoValor("peso"); if (datos.pesos.length) { var p = datos.pesos[datos.pesos.length - 1]; return p.kg; } return m; }
 function htmlProgreso() {
   var s = hoy(), sem = promediosSemanales().slice(-10);
-  var h = "<div class=\"tarjeta\"><h2>Peso</h2><div class=\"fila\"><input id=\"peso-fecha\" type=\"date\" value=\"" + s + "\" max=\"" + s + "\" style=\"max-width:11rem\"><input id=\"peso-kg\" type=\"number\" inputmode=\"decimal\" step=\"0.1\" placeholder=\"kg\" style=\"max-width:7rem\"><button class=\"btn\" data-acc=\"guardar-peso2\">Guardar</button></div>" + grafico();
+  var h = htmlCuenta();
+  h += "<div class=\"tarjeta ancho\"><h2>Peso</h2><div class=\"fila\"><input id=\"peso-fecha\" type=\"date\" value=\"" + s + "\" max=\"" + s + "\" style=\"max-width:11rem\"><input id=\"peso-kg\" type=\"number\" inputmode=\"decimal\" step=\"0.1\" placeholder=\"kg\" style=\"max-width:7rem\"><button class=\"btn\" data-acc=\"guardar-peso2\">Guardar</button></div>" + grafico();
   if (sem.length) {
-    h += "<table class=\"tabla\"><thead><tr><th>Semana del</th><th class=\"n\">Promedio</th><th class=\"n\">Cambio</th></tr></thead><tbody>";
+    h += "<div class=\"scroll\"><table class=\"tabla\"><thead><tr><th>Semana del</th><th class=\"n\">Promedio</th><th class=\"n\">Cambio</th></tr></thead><tbody>";
     sem.forEach(function (w, i) {
       var prev = i > 0 ? sem[i - 1] : null, ch = prev ? w.prom - prev.prom : null, f = faseDe(w.lunes), est = "";
       if (ch != null && f.def) est = ch > -0.25 ? " · lento" : ch < -0.9 ? " · rápido" : " · ✓";
       h += "<tr><td>" + bonita(w.lunes) + " <span class=\"suave\">(" + w.n + ")</span></td><td class=\"n\">" + fmt(w.prom, 1) + " kg</td><td class=\"n\">" + (ch == null ? "–" : (ch > 0 ? "+" : "") + fmt(ch, 2)) + est + "</td></tr>";
     });
-    h += "</tbody></table>";
+    h += "</tbody></table></div>";
   }
   h += htmlAjuste();
-  h += "<details><summary>Pesajes anotados</summary>" + datos.pesos.slice(-14).reverse().map(function (p) { return "<div class=\"meta-sem\"><span>" + bonita(p.fecha) + "</span><span>" + p.kg + " kg <button class=\"borrar\" data-acc=\"borrar-peso\" data-f=\"" + p.fecha + "\" aria-label=\"Borrar\">×</button></span></div>"; }).join("") + "</details></div>";
+  h += "<details><summary>Pesajes anotados</summary>" + datos.pesos.slice(-21).reverse().map(function (p) { return "<div class=\"meta-sem\"><span>" + bonita(p.fecha) + "</span><span>" + p.kg + " kg <button class=\"borrar\" data-acc=\"borrar-peso\" data-f=\"" + p.fecha + "\" aria-label=\"Borrar\">×</button></span></div>"; }).join("") + "</details></div>";
 
+  h += htmlFuerza();
+
+  var cint = datos.cinturas.map(function (c) { return { fecha: c.fecha, v: c.cm }; });
   h += "<div class=\"tarjeta\"><h2>Cintura (cada lunes)</h2><p class=\"chico suave\">En la mañana, antes de desayunar, a la altura del ombligo, sin meter la panza. Es tu mejor guía de que bajas grasa.</p><div class=\"fila\"><input id=\"cintura-cm\" type=\"number\" inputmode=\"decimal\" step=\"0.1\" placeholder=\"cm\" style=\"max-width:8rem\"><button class=\"btn\" data-acc=\"guardar-cintura\">Guardar</button></div>" +
+    (cint.length >= 2 ? linea(cint, { marcas: true, titulo: "Cintura" }) : "") +
     datos.cinturas.slice(-8).reverse().map(function (c, i, arr) { var prev = arr[i + 1]; return "<div class=\"meta-sem\"><span>" + bonita(c.fecha) + "</span><span>" + c.cm + " cm" + (prev ? " <span class=\"suave\">(" + (c.cm - prev.cm > 0 ? "+" : "") + fmt(c.cm - prev.cm, 1) + ")</span>" : "") + " <button class=\"borrar\" data-acc=\"borrar-cintura\" data-f=\"" + c.fecha + "\" aria-label=\"Borrar\">×</button></span></div>"; }).join("") + "</div>";
 
   h += "<div class=\"tarjeta\"><h2>Medidas completas (cada 4 semanas)</h2><p class=\"chico suave\">En cm, en la mañana, relajado, con la cinta pegada a la piel sin apretar. Lo que no tengas, déjalo vacío.</p><div class=\"grid2\">" +
     CAMPOS.map(function (c) { var ph = c[0] === "estatura" ? v(ultimoValor("estatura")) : ""; return "<label>" + esc(c[1]) + "<input type=\"number\" inputmode=\"decimal\" step=\"0.1\" data-medida=\"" + c[0] + "\" value=\"" + ph + "\"></label>"; }).join("") +
-    "</div><button class=\"btn bloque\" style=\"margin-top:.7rem\" data-acc=\"guardar-medidas\">Guardar medidas</button>" +
-    (datos.medidas.length ? "<details><summary>Medidas guardadas</summary>" + datos.medidas.slice().reverse().map(function (m) {
-      return "<div class=\"meta-sem\"><span><b>" + bonita(m.fecha) + "</b> <span class=\"suave chico\">" + CAMPOS.filter(function (c) { return m[c[0]] != null; }).map(function (c) { return c[0] + " " + m[c[0]]; }).join(" · ") + "</span></span><button class=\"borrar\" data-acc=\"borrar-medida\" data-f=\"" + m.fecha + "\" aria-label=\"Borrar\">×</button></div>";
-    }).join("") + "</details>" : "") + "</div>";
-
-  h += htmlResultados() + htmlPotencial() + htmlHistorial();
-  h += "<div class=\"tarjeta\"><h2>Tus datos</h2><p class=\"chico\">Se guardan solo en este celular. Haz un respaldo cada 2 semanas y guárdalo en tu WhatsApp o en Drive." + (datos.ajustes.ultimoRespaldo ? " Último: " + bonita(datos.ajustes.ultimoRespaldo) + "." : "") + "</p>" +
+    "</div><button class=\"btn bloque\" style=\"margin-top:.7rem\" data-acc=\"guardar-medidas\">Guardar medidas</button></div>";
+  h += htmlTablaMedidas();
+  h += htmlResultados() + htmlPotencial() + htmlConstancia() + htmlFotos() + htmlHistorial();
+  h += "<div class=\"tarjeta ancho\"><h2>Respaldo</h2><p class=\"chico\">" + (nube.user ? "Tus datos ya se guardan en la nube. Igual puedes descargar una copia." : "Sin cuenta, tus datos están solo en este equipo. Haz un respaldo cada 2 semanas o entra con Google para sincronizar.") + (datos.ajustes.ultimoRespaldo ? " Último respaldo: " + bonita(datos.ajustes.ultimoRespaldo) + "." : "") + "</p>" +
     "<div class=\"fila\"><button class=\"btn\" data-acc=\"exportar\">Exportar respaldo</button><button class=\"btn sec\" data-acc=\"importar\">Importar</button><button class=\"btn peligro\" data-acc=\"borrar-todo\">Borrar todo</button></div></div>";
   return h;
+}
+function htmlTablaMedidas() {
+  if (!datos.medidas.length) return "";
+  var cols = [["peso", "Peso"], ["cintura", "Cintura"], ["cuello", "Cuello"], ["pecho", "Pecho"], ["brazoCon", "Brazo"], ["antebrazo", "Antebr."], ["muslo", "Muslo"], ["pantorrilla", "Pantorr."]];
+  var est = ultimoValor("estatura");
+  return "<div class=\"tarjeta ancho\"><h2>Evolución de medidas</h2><div class=\"scroll\"><table class=\"tabla\"><thead><tr><th>Fecha</th>" + cols.map(function (c) { return "<th class=\"n\">" + c[1] + "</th>"; }).join("") + "<th class=\"n\">% grasa</th><th></th></tr></thead><tbody>" +
+    datos.medidas.slice().reverse().map(function (m) {
+      var bf = grasaMarina(m.cintura, m.cuello, m.estatura || est);
+      return "<tr><td>" + bonita(m.fecha) + "</td>" + cols.map(function (c) { return "<td class=\"n\">" + (m[c[0]] != null ? m[c[0]] : "–") + "</td>"; }).join("") + "<td class=\"n\">" + (bf == null ? "–" : fmt(bf, 1)) + "</td><td><button class=\"borrar\" data-acc=\"borrar-medida\" data-f=\"" + m.fecha + "\" aria-label=\"Borrar\">×</button></td></tr>";
+    }).join("") + "</tbody></table></div></div>";
 }
 function grasaMarina(cintura, cuello, est) { if (!(cintura > cuello) || !est) return null; return 495 / (1.0324 - 0.19077 * Math.log10(cintura - cuello) + 0.15456 * Math.log10(est)) - 450; }
 function htmlResultados() {
@@ -1001,16 +1050,218 @@ function htmlPotencial() {
     "<p class=\"chico suave\">Es el techo de los naturales con mejor genética tras muchos años, medido en condición magra. Una referencia para saber hacia dónde vas, no una promesa.</p>";
   return tarjeta("Tu potencial natural (el físico del 1%)", h);
 }
+var histSel = "todas";
 function htmlHistorial() {
-  if (!datos.registros.length) return tarjeta("Historial de sesiones", "<p class=\"chico suave\">Aquí aparecerán tus sesiones guardadas.</p>");
-  return tarjeta("Historial de sesiones", datos.registros.slice(-20).reverse().map(function (r) {
-    var x = sesion(r.sesion), nombres = {};
-    if (x) x.ej.forEach(function (e) { nombres[e.id] = e.n; });
+  if (!datos.registros.length) return tarjeta("Historial de sesiones", "<p class=\"chico suave\">Aquí aparecerán tus sesiones guardadas.</p>", true);
+  var lista_ = datos.registros.filter(function (r) { return histSel === "todas" || r.sesion === histSel; }).slice(-40).reverse();
+  var filtro = "<select data-hist aria-label=\"Filtrar sesiones\" style=\"max-width:16rem\"><option value=\"todas\">Todas las sesiones</option>" + PLAN.sesiones.map(function (x) { return "<option value=\"" + x.id + "\"" + (histSel === x.id ? " selected" : "") + ">" + esc(x.nombre) + "</option>"; }).join("") + "</select>";
+  return tarjeta("Historial de sesiones", filtro + (lista_.length ? "" : "<p class=\"chico suave\">No hay sesiones de ese tipo.</p>") + lista_.map(function (r) {
+    var x = sesion(r.sesion), nombres = nombresEjercicios();
     return "<details><summary>" + DCORTO[diaSemana(r.fecha)] + " " + bonita(r.fecha) + " · " + esc(x ? x.nombre : r.sesion) + "</summary><div class=\"chico\">" +
-      Object.keys(r.ej).map(function (id) { return "<div>" + esc(nombres[id] || id) + ": <span class=\"suave\">" + r.ej[id].map(function (s) { return v(s.kg === null ? "–" : s.kg) + "×" + v(s.reps === null ? "–" : s.reps); }).join(" · ") + "</span></div>"; }).join("") +
+      Object.keys(r.ej || {}).map(function (id) { return "<div>" + esc(nombres[id] || id) + ": <span class=\"suave\">" + r.ej[id].map(function (s) { return v(s.kg === null ? "–" : s.kg) + "×" + v(s.reps === null ? "–" : s.reps); }).join(" · ") + "</span></div>"; }).join("") +
       (r.nota ? "<p class=\"suave\">📝 " + esc(r.nota) + "</p>" : "") +
       "<button class=\"btn peligro mini\" style=\"margin-top:.4rem\" data-acc=\"borrar-registro\" data-f=\"" + r.fecha + "\" data-id=\"" + r.sesion + "\">Borrar esta sesión</button></div></details>";
-  }).join(""));
+  }).join(""), true);
+}
+function nombresEjercicios() { var n = {}; PLAN.sesiones.forEach(function (x) { x.ej.forEach(function (e) { n[e.id] = e.n; }); }); return n; }
+function e1rm(st) { return (st.kg > 0 && st.reps > 0 && st.reps <= 15) ? st.kg * (1 + st.reps / 30) : 0; }
+function serieEjercicio(id) {
+  return datos.registros.filter(function (r) { return r.ej && r.ej[id]; }).map(function (r) {
+    var m = 0, top = 0; r.ej[id].forEach(function (st) { m = Math.max(m, e1rm(st)); top = Math.max(top, st.kg || 0); });
+    return { fecha: r.fecha, v: m, top: top };
+  }).filter(function (p) { return p.v > 0; });
+}
+var ejSel = null;
+function htmlFuerza() {
+  var n = nombresEjercicios(), ids = Object.keys(n).filter(function (id) { return serieEjercicio(id).length; });
+  if (!ids.length) return tarjeta("Fuerza por ejercicio", "<p class=\"chico suave\">Cuando guardes sesiones con kg y reps, aquí verás cómo sube cada ejercicio y tus récords.</p>", true);
+  if (!ejSel || ids.indexOf(ejSel) < 0) ejSel = ids.indexOf("sentadilla") >= 0 ? "sentadilla" : ids[0];
+  var serie = serieEjercicio(ejSel), mejor = serie.reduce(function (a, p) { return p.v > a.v ? p : a; }, serie[0]);
+  var maxTop = serie.reduce(function (a, p) { return Math.max(a, p.top); }, 0);
+  var sel = "<select data-ej-sel aria-label=\"Ejercicio\">" + ids.map(function (id) { return "<option value=\"" + id + "\"" + (id === ejSel ? " selected" : "") + ">" + esc(n[id]) + "</option>"; }).join("") + "</select>";
+  var filas = ids.map(function (id) {
+    var se = serieEjercicio(id), b = se.reduce(function (a, p) { return p.v > a.v ? p : a; }, se[0]), t = se.reduce(function (a, p) { return Math.max(a, p.top); }, 0);
+    return "<tr><td>" + esc(n[id]) + "</td><td class=\"n\">" + fmt(b.v, 1) + "</td><td class=\"n\">" + t + "</td><td class=\"n\">" + bonita(b.fecha) + "</td></tr>";
+  }).join("");
+  return "<div class=\"tarjeta ancho\"><h2>Fuerza por ejercicio</h2>" + sel +
+    linea(serie, { marcas: true, titulo: "1RM estimado", vacio: "Con 2 sesiones de este ejercicio aparece la gráfica." }) +
+    "<p class=\"chico\">Mejor 1RM estimado: <b>" + fmt(mejor.v, 1) + " kg</b> (" + bonita(mejor.fecha) + ") · Peso más alto usado: <b>" + maxTop + " kg</b></p>" +
+    "<p class=\"chico suave\">El 1RM estimado sale de tu mejor serie (peso × reps) y sirve para comparar sesiones aunque cambies de reps.</p>" +
+    "<details><summary>Récords de todos los ejercicios</summary><div class=\"scroll\"><table class=\"tabla\"><thead><tr><th>Ejercicio</th><th class=\"n\">1RM est.</th><th class=\"n\">Máx kg</th><th class=\"n\">Fecha</th></tr></thead><tbody>" + filas + "</tbody></table></div></details></div>";
+}
+function htmlConstancia() {
+  var l = lunesDe(hoy()), inicio = PLAN.fases[0].desde, filas = "";
+  for (var i = 0; i < 10; i++) {
+    var lu = sumarDias(l, -7 * i); if (sumarDias(lu, 6) < inicio) break;
+    var c = contarSemana(lu), su = [];
+    for (var k = 0; k < 7; k++) { var d = datos.diario[sumarDias(lu, k)]; if (d && d.sueno) su.push(d.sueno); }
+    filas += "<tr><td>" + bonita(lu) + "</td><td class=\"n\">" + c.sesiones + "/6</td><td class=\"n\">" + c.proteina + "/7</td><td class=\"n\">" + c.creatina + "/7</td><td class=\"n\">" + c.pantalla + "/7</td><td class=\"n\">" + (su.length ? fmt(su.reduce(function (a, b) { return a + b; }, 0) / su.length, 1) : "–") + "</td></tr>";
+  }
+  return tarjeta("Constancia por semana", "<div class=\"scroll\"><table class=\"tabla\"><thead><tr><th>Semana del</th><th class=\"n\">Gym</th><th class=\"n\">Proteína</th><th class=\"n\">Creatina</th><th class=\"n\">Pantalla</th><th class=\"n\">Sueño</th></tr></thead><tbody>" + filas + "</tbody></table></div><p class=\"chico suave\">Sale de lo que marcas en la pestaña Hoy. Sueño: promedio de cómo te levantaste (1-10).</p>", true);
+}
+var fotos = [], cmpA = null, cmpB = null;
+var TIPOS_FOTO = [["frente", "Frente"], ["perfil", "Perfil"], ["espalda", "Espalda"]];
+function htmlFotos() {
+  if (!nube.user) return tarjeta("Fotos de progreso", "<p class=\"chico suave\">Las fotos se guardan en tu cuenta. Entra con Google (arriba) para usarlas.</p>", true);
+  var fechas = []; fotos.forEach(function (f) { if (fechas.indexOf(f.fecha) < 0) fechas.push(f.fecha); }); fechas.sort().reverse();
+  if (!cmpA || fechas.indexOf(cmpA) < 0) cmpA = fechas[fechas.length - 1] || null;
+  if (!cmpB || fechas.indexOf(cmpB) < 0) cmpB = fechas[0] || null;
+  function img(fe, t) { var f = fotos.filter(function (x) { return x.fecha === fe && x.tipo === t; })[0]; return f ? "<img src=\"" + f.img + "\" alt=\"" + t + " " + fe + "\" loading=\"lazy\">" : "<div class=\"suave chico\" style=\"aspect-ratio:3/4;display:grid;place-items:center;background:#0b0d11;border-radius:10px\">sin foto</div>"; }
+  function opts(sel) { return fechas.map(function (fe) { return "<option value=\"" + fe + "\"" + (fe === sel ? " selected" : "") + ">" + bonita(fe) + " " + fe.slice(0, 4) + "</option>"; }).join(""); }
+  var h = "<p class=\"chico suave\">Cada 4 semanas, con la misma luz y la misma hora: frente, perfil y espalda, relajado. Se comprimen y solo tu cuenta puede verlas.</p>" +
+    "<div class=\"grid2\"><label>Fecha<input type=\"date\" id=\"foto-fecha\" value=\"" + hoy() + "\" max=\"" + hoy() + "\"></label><label>Vista<select id=\"foto-tipo\">" + TIPOS_FOTO.map(function (t) { return "<option value=\"" + t[0] + "\">" + t[1] + "</option>"; }).join("") + "</select></label></div>" +
+    "<button class=\"btn bloque\" style=\"margin-top:.6rem\" data-acc=\"elegir-foto\">📷 Subir foto</button><input type=\"file\" id=\"foto-archivo\" accept=\"image/*\" hidden>";
+  if (fechas.length >= 2) {
+    h += "<h3 style=\"margin-top:1rem\">Comparar</h3><div class=\"grid2\"><select data-cmp=\"a\">" + opts(cmpA) + "</select><select data-cmp=\"b\">" + opts(cmpB) + "</select></div><div class=\"comparar\">" +
+      TIPOS_FOTO.map(function (t) { return img(cmpA, t[0]) + img(cmpB, t[0]); }).join("") + "</div>";
+  }
+  h += fechas.map(function (fe) {
+    return "<h3 style=\"margin-top:1rem\">" + bonita(fe) + " " + fe.slice(0, 4) + "</h3><div class=\"fotos\">" + fotos.filter(function (x) { return x.fecha === fe; }).map(function (f) {
+      return "<figure><img src=\"" + f.img + "\" alt=\"" + f.tipo + "\" loading=\"lazy\"><figcaption>" + f.tipo + "</figcaption><button class=\"borrar\" data-acc=\"borrar-foto\" data-id=\"" + f.id + "\" aria-label=\"Borrar foto\">×</button></figure>";
+    }).join("") + "</div>";
+  }).join("");
+  return tarjeta("Fotos de progreso", h, true);
+}
+function comprimir(file) {
+  return new Promise(function (ok, mal) {
+    var im = new Image(), url = URL.createObjectURL(file);
+    im.onload = function () {
+      var k = Math.min(1, 900 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      var q = 0.75, d = c.toDataURL("image/jpeg", q);
+      while (d.length > 600000 && q > 0.35) { q -= 0.1; d = c.toDataURL("image/jpeg", q); }
+      ok(d);
+    };
+    im.onerror = function () { URL.revokeObjectURL(url); mal(new Error("imagen")); };
+    im.src = url;
+  });
+}
+
+/* ---------- NUBE (Firebase): cuenta y sincronizacion ---------- */
+var FIREBASE = {
+  apiKey: "AIzaSyAkWGXnn5rVfgLlDEd1EL9IhSHar93OHfw",
+  authDomain: "rutina-9572d.firebaseapp.com",
+  projectId: "rutina-9572d",
+  storageBucket: "rutina-9572d.firebasestorage.app",
+  messagingSenderId: "38953618508",
+  appId: "1:38953618508:web:0f00dc48c18fab278538e9"
+};
+var FB_VERSION = "10.14.1";
+var nube = { A: null, F: null, auth: null, db: null, user: null, ref: null, subs: [], error: null };
+function o(k, val) { var x = {}; x[k] = val; return x; }
+function cargarFirebase() {
+  var base = "https://www.gstatic.com/firebasejs/" + FB_VERSION + "/";
+  Promise.all([import(base + "firebase-app.js"), import(base + "firebase-auth.js"), import(base + "firebase-firestore.js")]).then(function (m) {
+    var app = m[0].initializeApp(FIREBASE);
+    nube.A = m[1]; nube.F = m[2];
+    nube.auth = m[1].getAuth(app);
+    try { nube.db = m[2].initializeFirestore(app, { localCache: m[2].persistentLocalCache({ tabManager: m[2].persistentMultipleTabManager() }) }); }
+    catch (e) { nube.db = m[2].getFirestore(app); }
+    m[1].getRedirectResult(nube.auth).catch(errNube);
+    m[1].onAuthStateChanged(nube.auth, alCambiarUsuario);
+  }).catch(function (e) { nube.error = "sin-conexion"; console.warn("Firebase no cargó", e); pintarCuenta(); if (actual === "progreso") render(); });
+}
+function errNube(e) {
+  console.warn("nube", e);
+  if (!e) return;
+  if (e.code === "permission-denied") aviso("La nube rechazó el guardado. Revisa las reglas de Firestore.");
+  else if (e.code === "auth/unauthorized-domain") aviso("Este dominio no está autorizado en Firebase.");
+  else if (e.code && e.code.indexOf("auth/") === 0 && e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") aviso("No se pudo iniciar sesión: " + e.code);
+}
+function entrar() {
+  if (!nube.A) { aviso("Conectando con la nube… intenta en unos segundos."); return; }
+  var prov = new nube.A.GoogleAuthProvider();
+  prov.setCustomParameters({ prompt: "select_account" });
+  nube.A.signInWithPopup(nube.auth, prov).catch(function (e) {
+    if (e && (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment")) return nube.A.signInWithRedirect(nube.auth, prov);
+    errNube(e);
+  });
+}
+function salir() { if (nube.A && confirm("¿Cerrar sesión en este equipo? Tus datos siguen en la nube.")) nube.A.signOut(nube.auth); }
+function desuscribir() { nube.subs.forEach(function (u) { try { u(); } catch (e) {} }); nube.subs = []; }
+function alCambiarUsuario(u) {
+  desuscribir(); nube.user = u || null;
+  if (!u) { fotos = []; pintarCuenta(); render(); return; }
+  var F = nube.F;
+  nube.ref = F.doc(nube.db, "usuarios", u.uid, "datos", "principal");
+  pintarCuenta();
+  var primera = datos.ajustes.subidoA !== u.uid && (datos.registros.length || datos.pesos.length || datos.medidas.length || datos.cinturas.length || Object.keys(datos.diario).length);
+  (primera ? subirTodo().then(function () { datos.ajustes.subidoA = u.uid; guardar(); aviso("Tus datos de este equipo se subieron a la nube ✔"); }) : Promise.resolve())
+    .catch(errNube).then(escuchar);
+}
+function escuchar() {
+  var F = nube.F, uid = nube.user.uid;
+  nube.subs.push(F.onSnapshot(nube.ref, function (sn) { aplicarPrincipal(sn.exists() ? sn.data() : {}); }, errNube));
+  nube.subs.push(F.onSnapshot(F.collection(nube.db, "usuarios", uid, "registros"), function (qs) {
+    datos.registros = qs.docs.map(function (d) { return d.data(); }).sort(porFecha); guardar(); refrescar();
+  }, errNube));
+  nube.subs.push(F.onSnapshot(F.collection(nube.db, "usuarios", uid, "fotos"), function (qs) {
+    fotos = qs.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); }).sort(porFecha); if (actual === "progreso") refrescar();
+  }, errNube));
+}
+function mapaArr(m, fn) { return Object.keys(m || {}).sort().map(function (f) { return fn(f, m[f]); }); }
+function aplicarPrincipal(p) {
+  datos.pesos = mapaArr(p.pesos, function (f, x) { return { fecha: f, kg: x }; });
+  datos.cinturas = mapaArr(p.cinturas, function (f, x) { return { fecha: f, cm: x }; });
+  datos.medidas = mapaArr(p.medidas, function (f, x) { return Object.assign({ fecha: f }, x); });
+  datos.diario = p.diario || {}; datos.semanal = p.semanal || {};
+  guardar(); refrescar();
+}
+function refrescar() {
+  var foco = document.activeElement;
+  if (foco && foco.matches && foco.matches("main input[type=number], main input[type=date], main textarea")) return;
+  render();
+}
+function principalLocal() {
+  var p = { pesos: {}, cinturas: {}, medidas: {}, diario: datos.diario, semanal: datos.semanal };
+  datos.pesos.forEach(function (x) { p.pesos[x.fecha] = x.kg; });
+  datos.cinturas.forEach(function (x) { p.cinturas[x.fecha] = x.cm; });
+  datos.medidas.forEach(function (x) { var c = Object.assign({}, x); delete c.fecha; p.medidas[x.fecha] = c; });
+  return p;
+}
+function subirTodo() {
+  if (!nube.user) return Promise.resolve();
+  var F = nube.F, uid = nube.user.uid, b = F.writeBatch(nube.db);
+  b.set(nube.ref, principalLocal(), { merge: true });
+  datos.registros.slice(-450).forEach(function (r) { b.set(F.doc(nube.db, "usuarios", uid, "registros", r.fecha + "_" + r.sesion), r); });
+  return b.commit();
+}
+function nubeSet(obj) { if (nube.user) nube.F.setDoc(nube.ref, obj, { merge: true }).catch(errNube); }
+function nubeDel(campo, clave) { if (nube.user) nubeSet(o(campo, o(clave, nube.F.deleteField()))); }
+function nubeReg(r) { if (nube.user) nube.F.setDoc(nube.F.doc(nube.db, "usuarios", nube.user.uid, "registros", r.fecha + "_" + r.sesion), r).catch(errNube); }
+function nubeRegDel(f, id) { if (nube.user) nube.F.deleteDoc(nube.F.doc(nube.db, "usuarios", nube.user.uid, "registros", f + "_" + id)).catch(errNube); }
+function subirFoto(file) {
+  var fecha = $("#foto-fecha").value || hoy(), tipo = $("#foto-tipo").value;
+  aviso("Subiendo foto…");
+  comprimir(file).then(function (img) {
+    return nube.F.setDoc(nube.F.doc(nube.db, "usuarios", nube.user.uid, "fotos", fecha + "_" + tipo), { fecha: fecha, tipo: tipo, img: img });
+  }).then(function () { aviso("Foto guardada ✔"); }).catch(function (e) { errNube(e); if (!e || !e.code) aviso("No se pudo leer esa imagen."); });
+}
+function borrarNube() {
+  var F = nube.F, uid = nube.user.uid;
+  return Promise.all(["registros", "fotos"].map(function (c) { return F.getDocs(F.collection(nube.db, "usuarios", uid, c)); })).then(function (rs) {
+    var b = F.writeBatch(nube.db), n = 0;
+    rs.forEach(function (qs) { qs.docs.forEach(function (d) { if (n < 480) { b.delete(d.ref); n++; } }); });
+    b.delete(nube.ref);
+    return b.commit();
+  });
+}
+function pintarCuenta() {
+  var b = $("#cuenta"); if (!b) return;
+  if (nube.user) { b.textContent = "☁️ " + (navigator.onLine ? "Sincronizado" : "Sin internet"); b.classList.add("on"); }
+  else { b.textContent = nube.error ? "☁️ Sin nube" : "☁️ Entrar"; b.classList.remove("on"); }
+}
+function htmlAvisoNube() {
+  if (nube.user || !nube.A) return "";
+  return "<div class=\"aviso ancho\">Entra con Google para guardar todo en la nube y verlo igual en el celular y la PC. <button class=\"btn mini\" data-acc=\"entrar\">Entrar con Google</button></div>";
+}
+function htmlCuenta() {
+  if (!nube.A) return tarjeta("Tu cuenta", "<p class=\"chico suave\">" + (nube.error ? "No se pudo conectar con la nube (¿sin internet?). Lo que anotes queda en este equipo y se sube cuando entres." : "Conectando con la nube…") + "</p>", true);
+  if (!nube.user) return "<div class=\"tarjeta ancho destacada\"><h2>Sincroniza celular y PC</h2><p class=\"chico\">Entra con tu cuenta de Google y todo lo que anotes se guarda en la nube. Lo que ya tienes en este equipo se sube la primera vez. Solo tu cuenta puede ver tus datos.</p><button class=\"btn\" data-acc=\"entrar\">Entrar con Google</button></div>";
+  return tarjeta("Tu cuenta", "<p class=\"chico\">Conectado como <b>" + esc(nube.user.email || nube.user.displayName || "tu cuenta") + "</b>. Todo se sincroniza solo; sin internet se guarda en el equipo y se sube después.</p>" +
+    "<details><summary>Código de tu cuenta (UID)</summary><p class=\"chico suave\">Sirve para cerrar la base de datos solo a tu cuenta.</p><code class=\"uid\">" + esc(nube.user.uid) + "</code><button class=\"btn sec mini\" data-acc=\"copiar-uid\">Copiar</button></details>" +
+    "<button class=\"btn sec mini\" style=\"margin-top:.6rem\" data-acc=\"salir\">Cerrar sesión</button>", true);
 }
 
 /* ---------- GUIA ---------- */
@@ -1050,7 +1301,8 @@ function importar(archivo) {
     var d; try { d = JSON.parse(lector.result); } catch (e) { d = null; }
     if (!d || d.version !== 1 || !Array.isArray(d.registros)) { aviso("Ese archivo no es un respaldo válido."); return; }
     if (!confirm("Esto reemplaza los datos de este celular por los del respaldo. ¿Seguir?")) return;
-    datos = normalizar(d); guardar(); aviso("Respaldo cargado ✔"); render();
+    var sub = datos.ajustes.subidoA; datos = normalizar(d); datos.ajustes.subidoA = sub; guardar(); aviso("Respaldo cargado ✔"); render();
+    if (nube.user) subirTodo().catch(errNube);
   };
   lector.readAsText(archivo);
 }
@@ -1064,6 +1316,7 @@ function guardarPeso(fecha, kg) {
   if (kg == null || kg < 30 || kg > 200) { aviso("Escribe tu peso en kg."); return; }
   datos.pesos = datos.pesos.filter(function (p) { return p.fecha !== fecha; });
   datos.pesos.push({ fecha: fecha, kg: kg }); datos.pesos.sort(porFecha);
+  nubeSet({ pesos: o(fecha, kg) });
   guardar(); aviso("Peso guardado ✔"); render();
 }
 document.addEventListener("click", function (ev) {
@@ -1078,13 +1331,14 @@ document.addEventListener("click", function (ev) {
   else if (acc === "timer-parar") pararTimer();
   else if (acc === "guardar-peso") guardarPeso(s, numero($("#peso-hoy").value));
   else if (acc === "guardar-peso2") guardarPeso($("#peso-fecha").value || s, numero($("#peso-kg").value));
-  else if (acc === "borrar-peso") { datos.pesos = datos.pesos.filter(function (p) { return p.fecha !== b.dataset.f; }); guardar(); render(); }
+  else if (acc === "borrar-peso") { datos.pesos = datos.pesos.filter(function (p) { return p.fecha !== b.dataset.f; }); nubeDel("pesos", b.dataset.f); guardar(); render(); }
   else if (acc === "guardar-cintura") {
     var cm = numero($("#cintura-cm").value); if (cm == null || cm < 40 || cm > 200) { aviso("Escribe la cintura en cm."); return; }
     datos.cinturas = datos.cinturas.filter(function (c) { return c.fecha !== s; }); datos.cinturas.push({ fecha: s, cm: cm }); datos.cinturas.sort(porFecha);
+    nubeSet({ cinturas: o(s, cm) });
     guardar(); aviso("Cintura guardada ✔"); render();
   }
-  else if (acc === "borrar-cintura") { datos.cinturas = datos.cinturas.filter(function (c) { return c.fecha !== b.dataset.f; }); guardar(); render(); }
+  else if (acc === "borrar-cintura") { datos.cinturas = datos.cinturas.filter(function (c) { return c.fecha !== b.dataset.f; }); nubeDel("cinturas", b.dataset.f); guardar(); render(); }
   else if (acc === "guardar-medidas") {
     var m = { fecha: s }, alguno = false;
     $$("[data-medida]").forEach(function (i) { var n = numero(i.value); if (n != null && n > 0) { m[i.dataset.medida] = n; if (i.dataset.medida !== "estatura") alguno = true; } });
@@ -1092,19 +1346,38 @@ document.addEventListener("click", function (ev) {
     datos.medidas = datos.medidas.filter(function (x) { return x.fecha !== s; }); datos.medidas.push(m); datos.medidas.sort(porFecha);
     if (m.peso) { datos.pesos = datos.pesos.filter(function (p) { return p.fecha !== s; }); datos.pesos.push({ fecha: s, kg: m.peso }); datos.pesos.sort(porFecha); }
     if (m.cintura) { datos.cinturas = datos.cinturas.filter(function (c) { return c.fecha !== s; }); datos.cinturas.push({ fecha: s, cm: m.cintura }); datos.cinturas.sort(porFecha); }
+    var copia = Object.assign({}, m); delete copia.fecha;
+    var up = { medidas: o(s, copia) }; if (m.peso) up.pesos = o(s, m.peso); if (m.cintura) up.cinturas = o(s, m.cintura);
+    nubeSet(up);
     guardar(); aviso("Medidas guardadas ✔"); render();
   }
-  else if (acc === "borrar-medida") { if (confirm("¿Borrar las medidas del " + bonita(b.dataset.f) + "?")) { datos.medidas = datos.medidas.filter(function (x) { return x.fecha !== b.dataset.f; }); guardar(); render(); } }
-  else if (acc === "borrar-registro") { if (confirm("¿Borrar esta sesión del historial?")) { datos.registros = datos.registros.filter(function (r) { return !(r.fecha === b.dataset.f && r.sesion === b.dataset.id); }); guardar(); render(); } }
+  else if (acc === "borrar-medida") { if (confirm("¿Borrar las medidas del " + bonita(b.dataset.f) + "?")) { datos.medidas = datos.medidas.filter(function (x) { return x.fecha !== b.dataset.f; }); nubeDel("medidas", b.dataset.f); guardar(); render(); } }
+  else if (acc === "borrar-registro") { if (confirm("¿Borrar esta sesión del historial?")) { datos.registros = datos.registros.filter(function (r) { return !(r.fecha === b.dataset.f && r.sesion === b.dataset.id); }); nubeRegDel(b.dataset.f, b.dataset.id); guardar(); render(); } }
   else if (acc === "exportar") exportar();
   else if (acc === "importar") $("#archivo").click();
-  else if (acc === "borrar-todo") { if (confirm("¿Borrar TODOS tus registros de este celular?") && confirm("Seguro? Esto no se puede deshacer si no tienes respaldo.")) { datos = vacio(); guardar(); render(); aviso("Datos borrados."); } }
+  else if (acc === "borrar-todo") {
+    if (confirm(nube.user ? "¿Borrar TODOS tus registros de la nube y de este equipo?" : "¿Borrar TODOS tus registros de este equipo?") && confirm("Seguro? Esto no se puede deshacer si no tienes respaldo.")) {
+      var subido = datos.ajustes.subidoA;
+      datos = vacio(); datos.ajustes.subidoA = subido; guardar(); render();
+      if (nube.user) borrarNube().then(function () { aviso("Datos borrados."); }).catch(errNube); else aviso("Datos borrados.");
+    }
+  }
+  else if (acc === "cuenta") { if (nube.user) irA("progreso"); else entrar(); }
+  else if (acc === "entrar") entrar();
+  else if (acc === "salir") salir();
+  else if (acc === "copiar-uid") { if (navigator.clipboard) navigator.clipboard.writeText(nube.user.uid).then(function () { aviso("UID copiado ✔"); }); }
+  else if (acc === "elegir-foto") $("#foto-archivo").click();
+  else if (acc === "borrar-foto") { if (confirm("¿Borrar esta foto?")) nube.F.deleteDoc(nube.F.doc(nube.db, "usuarios", nube.user.uid, "fotos", b.dataset.id)).catch(errNube); }
 });
 document.addEventListener("change", function (ev) {
   var t = ev.target, s = hoy();
-  if (t.dataset.diario) { var d = datos.diario[s] = datos.diario[s] || {}; d[t.dataset.diario] = t.checked; guardar(); }
-  else if (t.dataset.semanal) { var l = lunesDe(s), w = datos.semanal[l] = datos.semanal[l] || {}; w[t.dataset.semanal] = t.checked; guardar(); }
-  else if (t.hasAttribute("data-sueno")) { var dd = datos.diario[s] = datos.diario[s] || {}; dd.sueno = +t.value; guardar(); }
+  if (t.dataset.diario) { var d = datos.diario[s] = datos.diario[s] || {}; d[t.dataset.diario] = t.checked; nubeSet({ diario: o(s, o(t.dataset.diario, t.checked)) }); guardar(); }
+  else if (t.dataset.semanal) { var l = lunesDe(s), w = datos.semanal[l] = datos.semanal[l] || {}; w[t.dataset.semanal] = t.checked; nubeSet({ semanal: o(l, o(t.dataset.semanal, t.checked)) }); guardar(); }
+  else if (t.hasAttribute("data-sueno")) { var dd = datos.diario[s] = datos.diario[s] || {}; dd.sueno = +t.value; nubeSet({ diario: o(s, { sueno: +t.value }) }); guardar(); }
+  else if (t.hasAttribute("data-ej-sel")) { ejSel = t.value; render(); }
+  else if (t.hasAttribute("data-hist")) { histSel = t.value; render(); }
+  else if (t.dataset.cmp) { if (t.dataset.cmp === "a") cmpA = t.value; else cmpB = t.value; render(); }
+  else if (t.id === "foto-archivo" && t.files && t.files[0]) { subirFoto(t.files[0]); t.value = ""; }
   else if (t.id === "archivo" && t.files && t.files[0]) { importar(t.files[0]); t.value = ""; }
   if ((t.dataset.diario || t.dataset.semanal) && actual === "hoy") render();
 });
@@ -1120,7 +1393,10 @@ document.addEventListener("visibilitychange", function () {
   if (!abierta && hoy() !== ultimoDia) render();
 });
 
+window.addEventListener("online", pintarCuenta);
+window.addEventListener("offline", pintarCuenta);
 render();
+cargarFirebase();
 })();
 </script>
 </body>
