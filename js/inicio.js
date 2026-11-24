@@ -1,7 +1,10 @@
 "use strict";
-/* Arranque: decide si mostrar la pantalla de inicio y conecta con la nube. */
+/* Arranque: pantalla de inicio, primera vista, nube y app instalable. */
 window.addEventListener("online", pintarCuenta);
 window.addEventListener("offline", pintarCuenta);
 pantallaInicio(modoSesion() ? "oculto" : "cargando");
 render();
 cargarFirebase();
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+}

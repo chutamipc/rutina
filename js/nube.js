@@ -10,7 +10,6 @@ var FIREBASE = {
 };
 var FB_VERSION = "10.14.1";
 var nube = { A: null, F: null, auth: null, db: null, user: null, ref: null, subs: [], error: null };
-function o(k, val) { var x = {}; x[k] = val; return x; }
 function cargarFirebase() {
   var base = "https://www.gstatic.com/firebasejs/" + FB_VERSION + "/";
   Promise.all([import(base + "firebase-app.js"), import(base + "firebase-auth.js"), import(base + "firebase-firestore.js")]).then(function (m) {
@@ -31,12 +30,12 @@ function cargarFirebase() {
 function errNube(e) {
   console.warn("nube", e);
   if (!e) return;
-  if (e.code === "permission-denied") aviso("La nube rechazó el guardado. Revisa las reglas de Firestore.");
-  else if (e.code === "auth/unauthorized-domain") aviso("Este dominio no está autorizado en Firebase.");
-  else if (e.code && e.code.indexOf("auth/") === 0 && e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") aviso("No se pudo iniciar sesión: " + e.code);
+  if (e.code === "permission-denied") aviso("La nube rechazó el guardado. Revisa las reglas de Firestore.", "triangle-alert");
+  else if (e.code === "auth/unauthorized-domain") aviso("Este dominio no está autorizado en Firebase.", "triangle-alert");
+  else if (e.code && e.code.indexOf("auth/") === 0 && e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") aviso("No se pudo iniciar sesión (" + e.code + "). Intenta de nuevo.", "triangle-alert");
 }
 function entrar() {
-  if (!nube.A) { aviso("Conectando con la nube… intenta en unos segundos."); return; }
+  if (!nube.A) { aviso("Conectando con la nube. Intenta en unos segundos.", "cloud"); return; }
   var prov = new nube.A.GoogleAuthProvider();
   nube.A.signInWithPopup(nube.auth, prov).catch(function (e) {
     if (e && (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment")) return nube.A.signInWithRedirect(nube.auth, prov);
@@ -57,7 +56,7 @@ function alCambiarUsuario(u) {
   nube.ref = F.doc(nube.db, "usuarios", u.uid, "datos", "principal");
   pintarCuenta();
   var primera = datos.ajustes.subidoA !== u.uid && (datos.registros.length || datos.pesos.length || datos.medidas.length || datos.cinturas.length || Object.keys(datos.diario).length);
-  (primera ? subirTodo().then(function () { datos.ajustes.subidoA = u.uid; guardar(); aviso("Tus datos de este equipo se subieron a la nube ✔"); }) : Promise.resolve())
+  (primera ? subirTodo().then(function () { datos.ajustes.subidoA = u.uid; guardar(); aviso("Tus datos de este equipo se subieron a la nube", "cloud"); }) : Promise.resolve())
     .catch(errNube).then(escuchar);
 }
 function escuchar() {
@@ -103,10 +102,10 @@ function nubeReg(r) { if (nube.user) nube.F.setDoc(nube.F.doc(nube.db, "usuarios
 function nubeRegDel(f, id) { if (nube.user) nube.F.deleteDoc(nube.F.doc(nube.db, "usuarios", nube.user.uid, "registros", f + "_" + id)).catch(errNube); }
 function subirFoto(file) {
   var fecha = $("#foto-fecha").value || hoy(), tipo = $("#foto-tipo").value;
-  aviso("Subiendo foto…");
+  aviso("Subiendo foto…", "upload");
   comprimir(file).then(function (img) {
     return nube.F.setDoc(nube.F.doc(nube.db, "usuarios", nube.user.uid, "fotos", fecha + "_" + tipo), { fecha: fecha, tipo: tipo, img: img });
-  }).then(function () { aviso("Foto guardada ✔"); }).catch(function (e) { errNube(e); if (!e || !e.code) aviso("No se pudo leer esa imagen."); });
+  }).then(function () { aviso("Foto guardada", "camera"); }).catch(function (e) { errNube(e); if (!e || !e.code) aviso("No se pudo leer esa imagen. Prueba con otra foto.", "triangle-alert"); });
 }
 function borrarNube() {
   var F = nube.F, uid = nube.user.uid;
@@ -119,19 +118,36 @@ function borrarNube() {
 }
 function pintarCuenta() {
   var b = $("#cuenta"); if (!b) return;
-  if (nube.user) { b.textContent = "☁️ " + (navigator.onLine ? "Sincronizado" : "Sin internet"); b.classList.add("on"); }
-  else { b.textContent = nube.error ? "☁️ Sin nube" : "☁️ Entrar"; b.classList.remove("on"); }
+  var conectado = !!nube.user, enLinea = navigator.onLine;
+  b.innerHTML = ico(conectado && !enLinea ? "cloud-off" : "cloud") + "<span>" + (conectado ? (enLinea ? "Sincronizado" : "Sin internet") : (nube.error ? "Sin nube" : "Entrar")) + "</span>";
+  b.classList.toggle("on", conectado && enLinea);
+  b.setAttribute("aria-label", conectado ? (enLinea ? "Tu cuenta: datos sincronizados" : "Sin internet: se sube al volver la conexión") : "Entrar con Google");
 }
 function htmlAvisoNube() {
   if (nube.user || !nube.A) return "";
-  return "<div class=\"aviso ancho\">Entra con Google para guardar todo en la nube y verlo igual en el celular y la PC. <button class=\"btn mini\" data-acc=\"entrar\">Entrar con Google</button></div>";
+  return banda("cloud", "Entra con Google para guardar todo en la nube y verlo igual en el celular y en la PC.", "<button class=\"btn btn-sec mini\" data-acc=\"entrar\">Entrar</button>");
 }
 function htmlCuenta() {
-  if (!nube.A) return tarjeta("Tu cuenta", "<p class=\"chico suave\">" + (nube.error ? "No se pudo conectar con la nube (¿sin internet?). Lo que anotes queda en este equipo y se sube cuando entres." : "Conectando con la nube…") + "</p>", true);
-  if (!nube.user) return "<div class=\"tarjeta ancho destacada\"><h2>Sincroniza celular y PC</h2><p class=\"chico\">Entra con tu cuenta de Google y todo lo que anotes se guarda en la nube. Lo que ya tienes en este equipo se sube la primera vez. Solo tu cuenta puede ver tus datos.</p><button class=\"btn\" data-acc=\"entrar\">Entrar con Google</button></div>";
-  return tarjeta("Tu cuenta", "<p class=\"chico\">Conectado como <b>" + esc(nube.user.email || nube.user.displayName || "tu cuenta") + "</b>. Todo se sincroniza solo; sin internet se guarda en el equipo y se sube después.</p>" +
-    "<details><summary>Código de tu cuenta (UID)</summary><p class=\"chico suave\">Sirve para cerrar la base de datos solo a tu cuenta.</p><code class=\"uid\">" + esc(nube.user.uid) + "</code><button class=\"btn sec mini\" data-acc=\"copiar-uid\">Copiar</button></details>" +
-    "<button class=\"btn sec mini\" style=\"margin-top:.6rem\" data-acc=\"salir\">Cerrar sesión</button>", true);
+  if (!nube.A) return caja("Tu cuenta", "<p class=\"vacio\">" + (nube.error ? "No hay conexión con la nube. Lo que anotes queda en este equipo y se sube cuando entres." : "Conectando con la nube…") + "</p>");
+  if (!nube.user) return caja("Sincroniza celular y PC", "<p>Entra con tu cuenta de Google y todo lo que anotes se guarda en la nube. Lo que ya tienes en este equipo se sube la primera vez. Solo tu cuenta puede ver tus datos.</p><button class=\"btn btn-tipo t-torso\" data-acc=\"entrar\">" + ico("user") + "Entrar con Google</button>");
+  return caja("Tu cuenta", "<p class=\"cuenta-correo\">" + ico("user") + "<b>" + esc(nube.user.email || nube.user.displayName || "Tu cuenta") + "</b></p><p>Todo se sincroniza solo. Sin internet se guarda en el equipo y se sube después. La sesión queda abierta en este equipo hasta que la cierres.</p>" +
+    "<details class=\"mini-lista\"><summary>Código de tu cuenta</summary><p class=\"nota\">Sirve para cerrar la base de datos solo a tu cuenta.</p><code class=\"uid\">" + esc(nube.user.uid) + "</code><button class=\"btn btn-sec mini\" data-acc=\"copiar-uid\">" + ico("copy") + "Copiar</button></details>" +
+    "<button class=\"btn btn-sec\" data-acc=\"salir\">" + ico("log-out") + "Cerrar sesión</button>");
+}
+function comprimir(file) {
+  return new Promise(function (ok, mal) {
+    var im = new Image(), url = URL.createObjectURL(file);
+    im.onload = function () {
+      var k = Math.min(1, 900 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      var q = 0.75, d = c.toDataURL("image/jpeg", q);
+      while (d.length > 600000 && q > 0.35) { q -= 0.1; d = c.toDataURL("image/jpeg", q); }
+      ok(d);
+    };
+    im.onerror = function () { URL.revokeObjectURL(url); mal(new Error("imagen")); };
+    im.src = url;
+  });
 }
 
 /* ---------- Pantalla de inicio de sesion ----------

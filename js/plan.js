@@ -8,16 +8,16 @@
    ========================================================================== */
 var PLAN = {
   fases: [
-    { id: "s0", nombre: "Semana 0 · Prueba", corto: "Semana 0", desde: "2026-11-23", hasta: "2026-11-29",
+    { id: "s0", nombre: "Semana 0: prueba", corto: "Semana 0", desde: "2026-11-23", hasta: "2026-11-29",
       kcal: 2400, kcalTexto: "Normal", p: 140, g: null, c: null,
       nota: "Come como siempre, pero ya con proteína alta, sin jugo y máximo 1 pan. Pesa tus porciones para aprender. Entrena dejando 2-3 reps en reserva para encontrar tus pesos. Esta semana: medidas, fotos y empezar la creatina." },
-    { id: "def1", nombre: "Definición · Bloque 1", corto: "Definición", desde: "2026-11-30", hasta: "2026-12-20",
+    { id: "def1", nombre: "Definición, bloque 1", corto: "Definición", desde: "2026-11-30", hasta: "2026-12-20",
       kcal: 2000, p: 145, g: 60, c: 220, def: true,
       nota: "Meta: bajar unos 0.5 kg por semana. Entrena pesado: mantener tus pesos ya es ganar." },
-    { id: "mant", nombre: "Mantenimiento · Navidad", corto: "Mantenimiento", desde: "2026-12-21", hasta: "2027-01-03",
+    { id: "mant", nombre: "Mantenimiento de Navidad", corto: "Mantenimiento", desde: "2026-12-21", hasta: "2027-01-03",
       kcal: 2450, p: 140, g: 70, c: 315,
       nota: "Comes más (sobre todo carbohidratos) y disfrutas las fiestas sin culpa. La balanza sube 1-2 kg por agua y glucógeno: es normal, no es grasa." },
-    { id: "def2", nombre: "Definición · Bloque 2", corto: "Definición", desde: "2027-01-04", hasta: "2027-02-28",
+    { id: "def2", nombre: "Definición, bloque 2", corto: "Definición", desde: "2027-01-04", hasta: "2027-02-28",
       kcal: 2000, p: 145, g: 60, c: 220, def: true,
       nota: "Igual que el bloque 1. En Carnaval (8 y 9 de febrero) comes a mantenimiento." },
     { id: "eval", nombre: "Evaluación", corto: "Evaluación", desde: "2027-03-01", hasta: "2099-12-31",
@@ -123,7 +123,7 @@ var PLAN = {
         tip: "Sube la pelvis hacia el pecho, no solo las piernas. Sin balanceo y bajando lento." }
     ]},
     { id: "TB", nombre: "Torso B", corto: "Torso B", foco: "Pecho alto y jalones", dia: 4, min: 80, cal: "torso",
-      notaExtra: "Haz el extra solo si esta semana no vas a hacer ningún día de Hombros y brazos.", ej: [
+      notaExtra: "Haz el extra solo si esta semana no vas a hacer ningún día de hombros y brazos.", ej: [
       { id: "press-inclinado-barra", n: "Press inclinado con barra (dentro de la jaula)", s: 3, r: [5, 8], e: "rir1", d: 210, a: "barra",
         tip: "Banco a 30° dentro de la jaula, con las barras de seguridad 2-3 cm debajo de tu pecho: si fallas, apoyas la barra ahí. Agarre un poco más ancho que los hombros; baja controlado al pecho alto, sin rebotar.",
         alt: "Press inclinado en Smith." },
@@ -177,11 +177,11 @@ var PLAN = {
 
   diario: [
     { id: "creatina", txt: "Creatina 5 g" },
-    { id: "proteina", txt: "Proteína 140 g o más" },
-    { id: "sinjugo", txt: "Sin jugo artificial ni gaseosa normal" },
-    { id: "cafe", txt: "Último café antes de las 2 pm" },
-    { id: "pantalla", txt: "Anoche: pantalla apagada en la cama" },
-    { id: "agua", txt: "2-3 L de agua" }
+    { id: "proteina", txt: "Proteína 140 g" },
+    { id: "sinjugo", txt: "Sin jugo ni gaseosa" },
+    { id: "cafe", txt: "Café antes de las 2 pm" },
+    { id: "pantalla", txt: "Sin pantalla en la cama" },
+    { id: "agua", txt: "Agua, 2 a 3 L" }
   ],
   metasSemana: [
     { id: "dias", txt: "Ir al gym 4 días o más (ideal 6)", auto: "sesiones", min: 4 },
@@ -207,7 +207,7 @@ var PLAN = {
       "Las cantidades son en **cocido** (arroz cocido, carne cocida)."
     ],
     dia: [
-      { comida: "Desayuno · 7:30", items: [
+      { comida: "Desayuno, 7:30", items: [
         ["Avena en agua", "40 g en seco", 150, 5],
         ["Guineo", "1 mediano", 90, 1],
         ["Huevos revueltos", "3 enteros + 2 claras", 250, 26],
@@ -215,15 +215,15 @@ var PLAN = {
         ["Pan", "1 (ninguno si compras almuerzo)", 140, 4],
         ["Aceite para cocinar", "1 cucharadita", 45, 0],
         ["Café negro", "sin azúcar", 5, 0] ]},
-      { comida: "Almuerzo · 1:20 (tupper)", items: [
+      { comida: "Almuerzo, 1:20 (tupper)", items: [
         ["Pechuga de pollo o carne magra", "150 g cocida", 250, 46],
         ["Arroz", "150 g cocido (¾ de taza)", 195, 4],
         ["Verduras o ensalada", "1 taza", 35, 2],
         ["Aceite", "1 cucharadita", 45, 0] ]},
-      { comida: "Media tarde · 4:30", items: [
+      { comida: "Media tarde, 4:30", items: [
         ["Atún en agua", "1 lata", 120, 26],
         ["Uvas o guineo", "1 taza de uvas o 1 guineo", 100, 1] ]},
-      { comida: "Cena · 7:00 (1 hora antes del gym)", items: [
+      { comida: "Cena, 7:00 (1 hora antes del gym)", items: [
         ["Carne de res magra, lomo o pollo", "130 g cocida", 250, 36],
         ["Arroz", "150 g cocido", 195, 4],
         ["Verduras", "1 taza", 35, 2] ]}
@@ -298,7 +298,7 @@ var PLAN = {
       "Queso fresco: 1 (≈500 g)",
       "Avena: 500 g (dura casi 2 semanas)",
       "Arroz: ≈1 kg en crudo",
-      "Guineos: 10 · uvas u otra fruta: 1 kg",
+      "Guineos: 10, y 1 kg de uvas u otra fruta",
       "Verduras: brócoli, zanahoria, vainita, tomate, pepino (1-1.5 kg)",
       "Pan: máximo 7",
       "Galletas de sal para las meriendas",
@@ -364,9 +364,8 @@ var PLAN = {
     pagina: [
       "**Entra con Google** (botón arriba a la derecha) y todo se guarda en la nube: lo ves igual en el celular y en la PC. Solo tu cuenta puede leer tus datos.",
       "Sin internet sigue funcionando: guarda en el equipo y sube los cambios cuando vuelve la conexión.",
-      "Igual puedes descargar una copia cuando quieras: Progreso → Respaldo → Exportar.",
-      
-      "Para tenerla como app: en Chrome, menú ⋮ → Añadir a pantalla de inicio.",
+      "Igual puedes descargar una copia cuando quieras, en Progreso, sección Cuenta.",
+      "Para tenerla como app: en Progreso, sección Cuenta, toca Instalar. Si no aparece, en Chrome abre el menú ⋮ y elige Añadir a pantalla de inicio.",
       "Cuando se actualice el plan, tus registros no se borran."
     ]
   }
