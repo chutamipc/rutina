@@ -47,23 +47,76 @@ function desuscribir() { nube.subs.forEach(function (u) { try { u(); } catch (e)
 function alCambiarUsuario(u) {
   desuscribir(); nube.user = u || null;
   if (!u) {
-    fotos = []; pintarCuenta();
+    fotos = []; nube.ref = null; pintarCuenta();
     if (modoSesion() === "local") pantallaInicio("oculto"); else { modoSesion(null); pantallaInicio("entrar"); }
     render(); return;
   }
   modoSesion("google"); pantallaInicio("oculto");
-  var F = nube.F;
-  nube.ref = F.doc(nube.db, "usuarios", u.uid, "datos", "principal");
+  nube.ref = nube.F.doc(nube.db, "usuarios", u.uid, "datos", "principal");
   pintarCuenta();
-  var primera = datos.ajustes.subidoA !== u.uid && (datos.registros.length || datos.pesos.length || datos.medidas.length || datos.cinturas.length || Object.keys(datos.diario).length);
-  (primera ? subirTodo().then(function () { datos.ajustes.subidoA = u.uid; guardar(); aviso("Tus datos de este equipo se subieron a la nube", "cloud"); }) : Promise.resolve())
-    .catch(errNube).then(escuchar);
+  var hayLocal = datos.registros.length || datos.pesos.length || datos.medidas.length || datos.cinturas.length || Object.keys(datos.diario).length;
+  var primera = datos.ajustes.subidoA !== u.uid && hayLocal;
+  var migrar = !primera && datos.ajustes.subidoA === u.uid && !datos.ajustes.colaV;
+  (primera ? primeraSubida(u) : migrar ? reconciliar(u) : Promise.resolve()).then(function () {
+    if (!primera) datos.ajustes.subidoA = u.uid;
+    datos.ajustes.colaV = 1;
+    guardar(); enviarPendientes(); escuchar();
+  }, function (e) {
+    /* Si no se pudo comparar con la nube, no se escucha en esta visita: asi
+       los datos del equipo no se tocan y se reintenta al abrir de nuevo. */
+    errNube(e); guardar();
+  });
+}
+/* Una sola vez, en equipos que ya usaban la nube antes de la cola de cambios:
+   sube lo que este equipo tenga y la nube no (sesiones, pesos, medidas y
+   habitos), sin pisar lo que la nube ya tiene. */
+function reconciliar(u) {
+  var F = nube.F;
+  return Promise.all([F.getDocs(F.collection(nube.db, "usuarios", u.uid, "registros")), F.getDoc(nube.ref)]).then(function (rs) {
+    var ids = rs[0].docs.map(function (d) { return d.id; }), remoto = rs[1].exists() ? rs[1].data() : {};
+    var b = F.writeBatch(nube.db), n = 0, local = principalLocal(), falta = {}, hay = false;
+    datos.registros.forEach(function (r) { if (ids.indexOf(r.fecha + "_" + r.sesion) < 0 && n < 400) { b.set(F.doc(nube.db, "usuarios", u.uid, "registros", r.fecha + "_" + r.sesion), r); n++; } });
+    ["pesos", "cinturas", "medidas"].forEach(function (c) {
+      Object.keys(local[c]).forEach(function (f) { if (!remoto[c] || !(f in remoto[c])) { falta[c] = falta[c] || {}; falta[c][f] = local[c][f]; hay = true; } });
+    });
+    ["diario", "semanal"].forEach(function (c) {
+      Object.keys(local[c] || {}).forEach(function (f) {
+        Object.keys(local[c][f] || {}).forEach(function (k) {
+          if (!remoto[c] || !remoto[c][f] || !(k in remoto[c][f])) { falta[c] = falta[c] || {}; falta[c][f] = falta[c][f] || {}; falta[c][f][k] = local[c][f][k]; hay = true; }
+        });
+      });
+    });
+    if (hay) b.set(nube.ref, falta, { merge: true });
+    if (!n && !hay) return;
+    return b.commit().then(function () { if (n) aviso(n + (n === 1 ? " sesión de este equipo se subió" : " sesiones de este equipo se subieron") + " a la nube", "cloud"); });
+  });
+}
+/* Primera vez que este equipo entra a la cuenta: sube lo que tenga. Si la
+   cuenta ya tiene sesiones y este equipo trae otras distintas (por ejemplo
+   pruebas), pregunta antes de mezclarlas. */
+function primeraSubida(u) {
+  var F = nube.F;
+  return F.getDocs(F.collection(nube.db, "usuarios", u.uid, "registros")).then(function (qs) {
+    var ids = qs.docs.map(function (d) { return d.id; });
+    var nuevos = datos.registros.filter(function (r) { return ids.indexOf(r.fecha + "_" + r.sesion) < 0; }).length;
+    if (ids.length && nuevos && !confirm("Este equipo tiene " + nuevos + (nuevos === 1 ? " sesión que no está" : " sesiones que no están") + " en tu cuenta. ¿Agregarlas a tu cuenta?\n\nSi eran pruebas, toca Cancelar y en este equipo quedará solo lo que ya está en tu cuenta.")) {
+      datos.ajustes.subidoA = u.uid; datos.ajustes.colaV = 1; datos.pendientes = []; guardar(); return;
+    }
+    return subirTodo().then(function () { datos.ajustes.subidoA = u.uid; datos.ajustes.colaV = 1; datos.pendientes = []; guardar(); aviso("Tus datos de este equipo se subieron a la nube", "cloud"); });
+  });
 }
 function escuchar() {
   var F = nube.F, uid = nube.user.uid;
-  nube.subs.push(F.onSnapshot(nube.ref, function (sn) { aplicarPrincipal(sn.exists() ? sn.data() : {}); }, errNube));
+  nube.subs.push(F.onSnapshot(nube.ref, function (sn) {
+    var vacioCache = sn.metadata && sn.metadata.fromCache && !sn.exists();
+    if (vacioCache && (datos.pesos.length || Object.keys(datos.diario).length)) return;
+    aplicarPrincipal(sn.exists() ? sn.data() : {});
+  }, errNube));
   nube.subs.push(F.onSnapshot(F.collection(nube.db, "usuarios", uid, "registros"), function (qs) {
-    datos.registros = qs.docs.map(function (d) { return d.data(); }).sort(porFecha); guardar(); refrescar();
+    if (qs.metadata && qs.metadata.fromCache && qs.empty && datos.registros.length) return;
+    datos.registros = qs.docs.map(function (d) { return d.data(); }).sort(porFecha);
+    datos.pendientes.forEach(function (op) { if (op.t === "reg" || op.t === "regDel") aplicarOpLocal(op); });
+    guardar(); refrescar();
   }, errNube));
   nube.subs.push(F.onSnapshot(F.collection(nube.db, "usuarios", uid, "fotos"), function (qs) {
     fotos = qs.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); }).sort(porFecha); if (actual === "progreso") refrescar();
@@ -75,6 +128,7 @@ function aplicarPrincipal(p) {
   datos.cinturas = mapaArr(p.cinturas, function (f, x) { return { fecha: f, cm: x }; });
   datos.medidas = mapaArr(p.medidas, function (f, x) { return Object.assign({ fecha: f }, x); });
   datos.diario = p.diario || {}; datos.semanal = p.semanal || {};
+  datos.pendientes.forEach(function (op) { if (op.t === "set" || op.t === "del") aplicarOpLocal(op); });
   guardar(); refrescar();
 }
 function refrescar() {
@@ -96,10 +150,64 @@ function subirTodo() {
   datos.registros.slice(-450).forEach(function (r) { b.set(F.doc(nube.db, "usuarios", uid, "registros", r.fecha + "_" + r.sesion), r); });
   return b.commit();
 }
-function nubeSet(obj) { if (nube.user) nube.F.setDoc(nube.ref, obj, { merge: true }).catch(errNube); }
-function nubeDel(campo, clave) { if (nube.user) nubeSet(o(campo, o(clave, nube.F.deleteField()))); }
-function nubeReg(r) { if (nube.user) nube.F.setDoc(nube.F.doc(nube.db, "usuarios", nube.user.uid, "registros", r.fecha + "_" + r.sesion), r).catch(errNube); }
-function nubeRegDel(f, id) { if (nube.user) nube.F.deleteDoc(nube.F.doc(nube.db, "usuarios", nube.user.uid, "registros", f + "_" + id)).catch(errNube); }
+
+/* ---------- Cola de cambios ----------
+   Cada cambio queda guardado en el equipo (datos.pendientes) hasta que la
+   nube confirma que lo recibio. Asi no se pierde nada si se anota algo
+   mientras la nube todavia carga, sin internet o con mala senal: se envia
+   apenas hay conexion, aunque se haya cerrado la app. */
+var opsEnVuelo = {};
+function encolar(op) {
+  if (!datos.ajustes.subidoA && !nube.user) return;
+  op.n = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  datos.pendientes.push(op); guardar();
+  if (nube.user && nube.ref) enviar(op);
+}
+function enviar(op) {
+  if (opsEnVuelo[op.n]) return;
+  var F = nube.F, uid = nube.user.uid, p;
+  try {
+    if (op.t === "set") p = F.setDoc(nube.ref, op.obj, { merge: true });
+    else if (op.t === "del") p = F.setDoc(nube.ref, o(op.campo, o(op.clave, F.deleteField())), { merge: true });
+    else if (op.t === "reg") p = F.setDoc(F.doc(nube.db, "usuarios", uid, "registros", op.reg.fecha + "_" + op.reg.sesion), op.reg);
+    else if (op.t === "regDel") p = F.deleteDoc(F.doc(nube.db, "usuarios", uid, "registros", op.f + "_" + op.ses));
+    else p = Promise.resolve();
+  } catch (e) { p = Promise.reject(e); }
+  opsEnVuelo[op.n] = true;
+  p.then(function () {
+    delete opsEnVuelo[op.n];
+    datos.pendientes = datos.pendientes.filter(function (x) { return x.n !== op.n; }); guardar();
+  }).catch(function (e) { delete opsEnVuelo[op.n]; errNube(e); });
+}
+function enviarPendientes() { if (nube.user && nube.ref) datos.pendientes.slice().forEach(enviar); }
+function upsertFecha(lista, item) { var out = lista.filter(function (x) { return x.fecha !== item.fecha; }); out.push(item); return out.sort(porFecha); }
+/* Aplica un cambio pendiente sobre los datos del equipo (para que se vea
+   aunque la nube aun no lo tenga). */
+function aplicarOpLocal(op) {
+  var f;
+  if (op.t === "reg") {
+    datos.registros = datos.registros.filter(function (r) { return !(r.fecha === op.reg.fecha && r.sesion === op.reg.sesion); });
+    datos.registros.push(op.reg); datos.registros.sort(porFecha);
+  }
+  else if (op.t === "regDel") datos.registros = datos.registros.filter(function (r) { return !(r.fecha === op.f && r.sesion === op.ses); });
+  else if (op.t === "set") {
+    var x = op.obj;
+    if (x.pesos) for (f in x.pesos) datos.pesos = upsertFecha(datos.pesos, { fecha: f, kg: x.pesos[f] });
+    if (x.cinturas) for (f in x.cinturas) datos.cinturas = upsertFecha(datos.cinturas, { fecha: f, cm: x.cinturas[f] });
+    if (x.medidas) for (f in x.medidas) datos.medidas = upsertFecha(datos.medidas, Object.assign({ fecha: f }, x.medidas[f]));
+    if (x.diario) for (f in x.diario) datos.diario[f] = Object.assign({}, datos.diario[f] || {}, x.diario[f]);
+    if (x.semanal) for (f in x.semanal) datos.semanal[f] = Object.assign({}, datos.semanal[f] || {}, x.semanal[f]);
+  }
+  else if (op.t === "del") {
+    if (op.campo === "pesos") datos.pesos = datos.pesos.filter(function (y) { return y.fecha !== op.clave; });
+    else if (op.campo === "cinturas") datos.cinturas = datos.cinturas.filter(function (y) { return y.fecha !== op.clave; });
+    else if (op.campo === "medidas") datos.medidas = datos.medidas.filter(function (y) { return y.fecha !== op.clave; });
+  }
+}
+function nubeSet(obj) { encolar({ t: "set", obj: obj }); }
+function nubeDel(campo, clave) { encolar({ t: "del", campo: campo, clave: clave }); }
+function nubeReg(r) { encolar({ t: "reg", reg: r }); }
+function nubeRegDel(f, ses) { encolar({ t: "regDel", f: f, ses: ses }); }
 function subirFoto(file) {
   var fecha = $("#foto-fecha").value || hoy(), tipo = $("#foto-tipo").value;
   aviso("Subiendo foto…", "upload");

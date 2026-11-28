@@ -575,3 +575,13 @@ details[open] > summary .acc-flecha { transform: rotate(180deg); }
 @media (forced-colors: active) {
   .disco, .pt, .meta-ico { forced-color-adjust: none; }
 }
+
+/* ---------- Fecha y nota de la sesion ---------- */
+.p-fecha { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border-radius: var(--r-m); background: var(--placa); border: 1px solid var(--linea); }
+.p-fecha label { display: flex; align-items: center; gap: 8px; flex: 1 1 160px; color: var(--tiza); font-size: 16px; font-weight: 650; }
+.p-fecha input { flex: 1 1 160px; width: auto; }
+.p-final label { color: var(--tiza); font-size: 17px; font-weight: 700; font-stretch: 85%; }
+.p-final label .nota { display: block; margin-top: 2px; font-size: 14px; font-weight: 400; font-stretch: 100%; }
+.hero-nota-dia { margin: 12px 0 0; padding: 10px 14px; border-left: 3px solid var(--c); border-radius: 0 var(--r-s) var(--r-s) 0; background: color-mix(in oklab, var(--c) 10%, transparent); color: var(--tiza); font-size: 15px; white-space: pre-line; }
+.hist-cuerpo .fila { margin-top: 12px; }
+.hist-cuerpo .fila .btn { margin-top: 0; }

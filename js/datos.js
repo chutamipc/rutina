@@ -38,13 +38,18 @@ function diaSemana(s) { return (aFecha(s).getDay() + 6) % 7; }
 function lunesDe(s) { return sumarDias(s, -diaSemana(s)); }
 function bonita(s) { var d = aFecha(s); return d.getDate() + " " + MESES[d.getMonth()]; }
 function fechaLarga(s) { var d = aFecha(s); return DIAS[diaSemana(s)] + " " + d.getDate() + " de " + MESES_LARGO[d.getMonth()]; }
+/* El dia cambia a las 3 am: una sesion guardada despues de medianoche cuenta
+   para el dia en que entrenaste. */
+var CORTE_DIA = 3;
 function hoy() {
   var q = new URLSearchParams(location.search).get("fecha");
-  return (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) ? q : aTexto(new Date());
+  if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) return q;
+  var d = new Date(); d.setHours(d.getHours() - CORTE_DIA);
+  return aTexto(d);
 }
 
 /* ---------- Datos guardados en el equipo ---------- */
-function vacio() { return { version: 1, registros: [], borradores: {}, pesos: [], cinturas: [], medidas: [], diario: {}, semanal: {}, ajustes: {} }; }
+function vacio() { return { version: 1, registros: [], borradores: {}, pesos: [], cinturas: [], medidas: [], diario: {}, semanal: {}, ajustes: {}, pendientes: [] }; }
 function porFecha(a, b) { return a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0; }
 function normalizar(d) {
   var base = vacio();
@@ -95,15 +100,19 @@ function hechasEnSemana(lunes) {
   datos.registros.forEach(function (r) { if (r.fecha >= lunes && r.fecha <= fin && !h[r.sesion]) h[r.sesion] = r.fecha; });
   return h;
 }
+function registroDe(fecha, id) { for (var i = datos.registros.length - 1; i >= 0; i--) { var r = datos.registros[i]; if (r.fecha === fecha && r.sesion === id) return r; } return null; }
 function sugerir(s) {
   var dow = diaSemana(s), hechas = hechasEnSemana(lunesDe(s)), hechaHoy = null;
-  for (var id in hechas) if (hechas[id] === s) hechaHoy = id;
-  if (dow === 6) return { descanso: true, hechas: hechas, plan: [], salta: [] };
+  datos.registros.forEach(function (r) { if (r.fecha === s) hechaHoy = r.sesion; });
+  if (dow === 6) return { descanso: true, hechas: hechas, hechaHoy: hechaHoy, plan: [], salta: [], fechas: {} };
   var dias = 6 - dow - (hechaHoy ? 1 : 0);
   var plan = ORDEN.filter(function (x) { return !hechas[x]; }), salta = [], exceso = plan.length - dias, i;
   for (i = plan.length - 1; i >= 0 && exceso > 0; i--) if (sesion(plan[i]).saltable) { salta.unshift(plan[i]); plan.splice(i, 1); exceso--; }
   for (i = plan.length - 1; i >= 0 && exceso > 0; i--) { salta.unshift(plan[i]); plan.splice(i, 1); exceso--; }
-  return { descanso: false, hechas: hechas, hechaHoy: hechaHoy, plan: plan, salta: salta, siguiente: plan[0] || null };
+  /* Dia en que toca cada sesion pendiente: hoy (o manana si ya entrenaste) y siguientes. */
+  var fechas = {}, base = hechaHoy ? 1 : 0;
+  plan.forEach(function (x, k) { fechas[x] = sumarDias(s, base + k); });
+  return { descanso: false, hechas: hechas, hechaHoy: hechaHoy, plan: plan, salta: salta, fechas: fechas, siguiente: plan[0] || null };
 }
 
 /* ---------- Historial de ejercicios ---------- */

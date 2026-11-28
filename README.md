@@ -25,6 +25,8 @@ Sin frameworks ni build: se publica tal cual con GitHub Pages desde `main`. Se p
 
 - Con sesión iniciada, todo se guarda en Firestore bajo `usuarios/{uid}/` y se sincroniza entre equipos. Sin internet, se guarda en el equipo y se sube después.
 - La sesión queda guardada en el equipo hasta que se toca "Cerrar sesión".
+- Cola de cambios (`datos.pendientes`): cada cambio se guarda en el equipo y se reenvía a la nube hasta que la nube lo confirma. Así no se pierde nada si se anota algo mientras la nube carga, sin internet o con mala señal.
+- El día cambia a las 3 am (`CORTE_DIA` en `js/datos.js`).
 - Sin cuenta, los datos quedan solo en el navegador (`localStorage`, clave `rutina-v1`).
 - Para probar otra fecha: agregar `?fecha=2026-12-01` a la URL.
 - Al cambiar archivos, sube la versión de `CACHE` en `sw.js` para que los equipos instalados tomen la nueva.

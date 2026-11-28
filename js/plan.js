@@ -323,7 +323,7 @@ var PLAN = {
       "**Progresión doble.** Cada ejercicio tiene un rango (por ejemplo 6-10). Cuando haces el máximo del rango en todas las series, la próxima vez subes: la mancuerna siguiente, 2.5 kg en barra (5 kg en peso muerto) o una placa en máquina. La página te avisa.",
       "**Descansos.** Pesados 3-4 min, secundarios 2-3 min, aislamiento 1.5-2 min. Usa el botón ⏱ de cada serie.",
       "**En definición, mantener tus pesos ya es ganar.** Si bajan un poco no pasa nada; si bajan mucho 2 semanas seguidas, hay que ajustar.",
-      "**Si faltas.** La pestaña Hoy te dice qué toca. Al día siguiente haces la sesión pendiente. Lo primero que se cae son los días de Hombros y brazos, nunca Pierna ni Torso. El domingo siempre descansas y el lunes empiezas de cero.",
+      "**Si faltas.** La pestaña Hoy te dice qué toca. Al día siguiente haces la sesión pendiente y las demás se corren un día; en Tu semana ves qué día toca cada una. Lo primero que se cae son los días de hombros y brazos, nunca pierna ni torso. El domingo siempre descansas y el lunes empiezas de cero.",
       "**Descargas: solo si las necesitas.** Una semana libre no quita músculo ni lo suma (Coleman 2024). Si te sientes muy cansado o te duelen los tendones: mismos pesos, 1 serie menos y 2-3 reps en reserva durante una semana.",
       "**Estirado:** baja siempre completo y con control; la parte estirada es la que más hace crecer. Las medias repeticiones abajo al final de la serie son un extra opcional.",
       "**Semana 0** (23 - 29 nov): todo con 2-3 reps en reserva para encontrar tus pesos y aprender los ejercicios nuevos."
@@ -363,7 +363,9 @@ var PLAN = {
     ],
     pagina: [
       "**Entra con Google** (botón arriba a la derecha) y todo se guarda en la nube: lo ves igual en el celular y en la PC. Solo tu cuenta puede leer tus datos.",
-      "Sin internet sigue funcionando: guarda en el equipo y sube los cambios cuando vuelve la conexión.",
+      "Sin internet o con mala señal sigue funcionando: todo se guarda en el equipo y se sube solo cuando vuelve la conexión, aunque cierres la app.",
+      "El día cambia a las 3 am: si guardas la sesión después de medianoche, cuenta para el día que entrenaste.",
+      "Para corregir una sesión (series, fecha o nota) toca Ver o corregir en Hoy, o en Progreso, Constancia, Historial.",
       "Igual puedes descargar una copia cuando quieras, en Progreso, sección Cuenta.",
       "Para tenerla como app: en Progreso, sección Cuenta, toca Instalar. Si no aparece, en Chrome abre el menú ⋮ y elige Añadir a pantalla de inicio.",
       "Cuando se actualice el plan, tus registros no se borran."

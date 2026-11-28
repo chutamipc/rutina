@@ -30,7 +30,7 @@ function importar(archivo) {
     var d; try { d = JSON.parse(lector.result); } catch (e) { d = null; }
     if (!d || d.version !== 1 || !Array.isArray(d.registros)) { aviso("Ese archivo no es una copia de la rutina.", "triangle-alert"); return; }
     if (!confirm("Esto reemplaza los datos de este equipo por los de la copia. ¿Seguir?")) return;
-    var sub = datos.ajustes.subidoA; datos = normalizar(d); datos.ajustes.subidoA = sub; guardar(); aviso("Copia cargada", "check"); render();
+    var sub = datos.ajustes.subidoA; datos = normalizar(d); datos.ajustes.subidoA = sub; datos.pendientes = []; guardar(); aviso("Copia cargada", "check"); render();
     if (nube.user) subirTodo().catch(errNube);
   };
   lector.readAsText(archivo);
@@ -80,6 +80,7 @@ function borrarTodo() {
   if (!confirm(nube.user ? "¿Borrar TODOS tus datos de la nube y de este equipo?" : "¿Borrar TODOS tus datos de este equipo?") || !confirm("¿Seguro? Esto no se puede deshacer si no tienes una copia.")) return;
   var subido = datos.ajustes.subidoA;
   datos = vacio(); datos.ajustes.subidoA = subido; guardar(); render();
+  opsEnVuelo = {};
   if (nube.user) borrarNube().then(function () { aviso("Datos borrados", "trash-2"); }).catch(errNube); else aviso("Datos borrados", "trash-2");
 }
 
@@ -91,7 +92,7 @@ document.addEventListener("click", function (ev) {
   if (b.dataset.semanal) { alternarSemanal(b); return; }
   if (b.dataset.prog) { progSec = b.dataset.prog; render(); var t = $("[data-prog=\"" + progSec + "\"]"); if (t) t.focus(); return; }
   var acc = b.dataset.acc, s = hoy();
-  if (acc === "abrir") abrirSesion(b.dataset.id);
+  if (acc === "abrir") abrirSesion(b.dataset.id, b.dataset.f || null);
   else if (acc === "cerrar") cerrarSesion(false);
   else if (acc === "guardar-sesion") guardarSesion();
   else if (acc === "repetir") repetirPesos(b.dataset.ej);

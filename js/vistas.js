@@ -58,9 +58,12 @@ function heroHoy(s, sug) {
     return "<section class=\"hero t-neutro\" aria-labelledby=\"hero-t\">" + cab + "<h1 id=\"hero-t\" class=\"hero-titulo\">Descanso</h1><p class=\"hero-sub\">Esta semana hiciste " + Object.keys(sug.hechas).length + " de 6 sesiones. Prepara la comida de la semana y mañana, antes de desayunar, mide tu cintura.</p>" + botonesSesiones() + "</section>";
   }
   if (sug.hechaHoy) {
-    var x = sesion(sug.hechaHoy), sig = sug.siguiente ? sesion(sug.siguiente) : null;
-    return "<section class=\"hero t-" + x.cal + " guardada\" aria-labelledby=\"hero-t\">" + cab + "<p class=\"hero-pre\">" + ico("check") + "Sesión guardada</p><h1 id=\"hero-t\" class=\"hero-titulo\">" + titulo(x.nombre) + "</h1><p class=\"hero-sub\">" + (sig ? "Mañana toca " + esc(sig.nombre) + "." : "Mañana descansas.") + "</p>" +
-      "<div class=\"hero-acc\"><button class=\"btn btn-sec\" data-acc=\"abrir\" data-id=\"" + x.id + "\">" + ico("rotate-ccw") + "Ver o corregir</button></div>" + botonesSesiones() + "</section>";
+    var x = sesion(sug.hechaHoy), sig = sug.siguiente ? sesion(sug.siguiente) : null, reg = registroDe(s, x.id), series = 0;
+    if (reg) Object.keys(reg.ej || {}).forEach(function (k) { series += reg.ej[k].length; });
+    return "<section class=\"hero t-" + x.cal + " guardada\" aria-labelledby=\"hero-t\">" + cab + "<p class=\"hero-pre\">" + ico("check") + "Sesión guardada</p><h1 id=\"hero-t\" class=\"hero-titulo\">" + titulo(x.nombre) + "</h1>" +
+      "<p class=\"hero-sub\">" + series + (series === 1 ? " serie anotada. " : " series anotadas. ") + (sig ? "Mañana toca " + esc(sig.nombre) + "." : "Mañana descansas.") + "</p>" +
+      (reg && reg.nota ? "<blockquote class=\"hero-nota-dia\"><span class=\"sr\">Tu nota: </span>" + esc(reg.nota) + "</blockquote>" : "") +
+      "<div class=\"hero-acc\"><button class=\"btn btn-sec\" data-acc=\"abrir\" data-id=\"" + x.id + "\" data-f=\"" + s + "\">" + ico("rotate-ccw") + "Ver o corregir</button></div>" + botonesSesiones() + "</section>";
   }
   if (!sug.siguiente) {
     return "<section class=\"hero t-hecho\" aria-labelledby=\"hero-t\">" + cab + "<p class=\"hero-pre\">" + ico("trophy") + "6 de 6</p><h1 id=\"hero-t\" class=\"hero-titulo\">Semana completa</h1><p class=\"hero-sub\">Hiciste todas las sesiones. Descansa y come bien.</p>" + botonesSesiones() + "</section>";
@@ -69,6 +72,7 @@ function heroHoy(s, sug) {
   return "<section class=\"hero t-" + t.cal + "\" aria-labelledby=\"hero-t\">" + cab +
     "<p class=\"hero-pre\">Hoy toca</p><h1 id=\"hero-t\" class=\"hero-titulo\">" + titulo(t.nombre) + "</h1>" +
     "<p class=\"hero-sub\">" + esc(t.foco) + ". " + nEj + " ejercicios, unos " + t.min + " minutos.</p>" +
+    (diaSemana(s) < 6 && ORDEN[diaSemana(s)] !== t.id && t.dia < diaSemana(s) ? "<p class=\"hero-nota\">" + ico("rotate-ccw") + "<span>Te toca esta porque quedó pendiente del " + DIAS[t.dia].toLowerCase() + ". Las demás se corren un día.</span></p>" : "") +
     "<div class=\"hero-acc\"><button class=\"btn btn-tipo grande\" data-acc=\"abrir\" data-id=\"" + t.id + "\">" + ico("play") + "Empezar sesión</button></div>" +
     (sug.salta.length ? "<p class=\"hero-nota\">" + ico("info") + "<span>Esta semana ya no alcanza para todo: se salta " + sug.salta.map(function (x) { return esc(sesion(x).nombre); }).join(" y ") + ". Pierna y torso nunca se saltan.</span></p>" : "") +
     botonesSesiones() + "</section>";
@@ -81,9 +85,11 @@ function barraSemana(s, sug) {
     if (sug.hechas[id]) est = "hecha";
     else if (!sug.descanso && !sug.hechaHoy && id === sug.siguiente) est = "hoy";
     else if (sug.salta.indexOf(id) >= 0) est = "salta";
-    var txt = { hecha: "hecha el " + bonita(sug.hechas[id] || s), hoy: "toca hoy", salta: "se salta esta semana", pend: "pendiente" }[est];
+    var fd = est === "hecha" ? sug.hechas[id] : (sug.fechas && sug.fechas[id]) || null;
+    var dia = est === "hecha" ? DCORTO[diaSemana(fd)] : est === "hoy" ? "Hoy" : est === "salta" ? "No va" : fd ? DCORTO[diaSemana(fd)] : DCORTO[i];
+    var txt = { hecha: "hecha el " + (fd ? fechaLarga(fd).toLowerCase() : ""), hoy: "toca hoy", salta: "se salta esta semana", pend: fd ? "toca el " + fechaLarga(fd).toLowerCase() : "pendiente" }[est];
     return "<li class=\"disco-col t-" + x.cal + " " + est + (cargada === id ? " carga" : "") + "\"><span class=\"disco\" aria-hidden=\"true\">" + (est === "hecha" ? ico("check") : "") + "</span>" +
-      "<span class=\"disco-dia\" aria-hidden=\"true\">" + DCORTO[i] + "</span><span class=\"disco-nom\" aria-hidden=\"true\">" + esc(x.corto) + "</span><span class=\"sr\">" + DIAS[i] + ", " + esc(x.nombre) + ": " + txt + ".</span></li>";
+      "<span class=\"disco-dia\" aria-hidden=\"true\">" + dia + "</span><span class=\"disco-nom\" aria-hidden=\"true\">" + esc(x.corto) + "</span><span class=\"sr\">" + esc(x.nombre) + ": " + txt + ".</span></li>";
   }).join("");
   return "<section class=\"barra-sem\" aria-labelledby=\"barra-t\"><div class=\"barra-cab\"><h2 id=\"barra-t\">Tu semana</h2><p><b>" + n + "</b> de 6 sesiones</p></div><ol class=\"barra\">" + discos + "</ol></section>";
 }
@@ -299,7 +305,7 @@ function historial() {
       return "<details class=\"hist t-" + (x ? x.cal : "neutro") + "\"><summary><i class=\"pt\" aria-hidden=\"true\"></i><span>" + esc(x ? x.nombre : r.sesion) + "</span><span class=\"suave\">" + DCORTO[diaSemana(r.fecha)] + " " + bonita(r.fecha) + "</span></summary><div class=\"hist-cuerpo\">" +
         Object.keys(r.ej || {}).map(function (id) { return "<p><b>" + esc(nombres[id] || id) + ":</b> " + r.ej[id].map(function (st) { return (st.kg == null ? "–" : st.kg) + " × " + (st.reps == null ? "–" : st.reps); }).join(", ") + "</p>"; }).join("") +
         (r.nota ? "<p class=\"nota\">Nota: " + esc(r.nota) + "</p>" : "") +
-        "<button class=\"btn btn-peligro mini\" data-acc=\"borrar-registro\" data-f=\"" + r.fecha + "\" data-id=\"" + r.sesion + "\">" + ico("trash-2") + "Borrar esta sesión</button></div></details>";
+        "<div class=\"fila\"><button class=\"btn btn-sec mini\" data-acc=\"abrir\" data-id=\"" + r.sesion + "\" data-f=\"" + r.fecha + "\">" + ico("rotate-ccw") + "Ver o corregir</button><button class=\"btn btn-peligro mini\" data-acc=\"borrar-registro\" data-f=\"" + r.fecha + "\" data-id=\"" + r.sesion + "\">" + ico("trash-2") + "Borrar</button></div></div></details>";
     }).join("") + "</section>";
 }
 var avisoInstalar = null;
